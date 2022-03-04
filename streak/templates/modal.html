@@ -1,0 +1,67 @@
+<div class="modal" id="streak__modal-new_task_create">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        {% if task_modal_mode == "create" %}
+        <p class="modal-card-title">Create new task</p>
+        {% else %}
+        <p class="modal-card-title">Update task</p>
+        {% endif %}
+        
+        <button class="delete streak__modal-new_task_create-close" aria-label="close"></button>
+      </header>
+      <section class="modal-card-body">
+          <div class="field">
+            <label class="label">Name</label>
+            <div class="control">
+              <input required 
+              {% if task %}
+                    value="{{ task.name }}"
+              {% endif %}
+              id="streak__modal-new_task_create-title" class="input" type="text" placeholder="My awesome task!">
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Schedule</label>
+            <div class="control">
+              <input required 
+              {% if task %}
+                    value="{{ task.schedule }}"
+              {% endif %}
+              class="input" 
+              id="streak__modal-new_task_create-schedule"
+              type="text" placeholder="09:00">
+            </div>
+          </div>
+          
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea class="textarea" 
+              {% if task %}
+                value="{{ task.description }}" 
+              {% endif %} 
+              id="streak__modal-new_task_create-description"
+              placeholder="I will break all milestones with this task!"></textarea>
+            </div>
+          </div>
+          
+        
+      </section>
+      <footer class="modal-card-foot">
+        <button class="button is-success" id="streak__modal-new_task_create-create">
+            <span class="icon">
+              <i class="fa fa-check"></i>
+            </span>
+            {% if task_modal_mode == "create" %}
+            <span>Create</span>
+            {% else %}
+            <span>Update</span>
+            {% endif %}
+            
+        </button>
+        <button class="button streak__modal-new_task_create-close">Cancel</button>
+      </footer>
+    </div>
+  </div>

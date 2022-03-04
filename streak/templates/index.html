@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">
+      Streak 🏃
+    </h1>
+    <h2 class="subtitle">
+      Loading Metadata...
+    </h2>
+
+  </div>
+
+  {%include 'notification.html' %}
+
+  <div class="container" style="padding-top: 2em;">
+
+    <button id="streak__button-new_task_create" class="button is-large is-primary js-modal-trigger" data-target="streak__modal-new_task_create">
+      <span class="icon">
+        <i class="fa fa-plus"></i>
+      </span>
+      <span>New</span>
+      
+    </button>
+  </div>
+
+  {% with task_modal_mode="create" %}
+    {% include 'modal.html' %}
+  {% endwith %}
+
+</section>
+
+
+
+
+{% endblock %}
