@@ -1,6 +1,7 @@
-import json
+import jwt
 import uuid
 import os
+import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -66,3 +67,20 @@ def update():
             session, task_uuid, name, description, schedule
         ),
     )
+
+
+@app.route("/api/v1/login")
+def login():
+    dct = request.get_json()
+    if not dct.get("name") or not dct.get("password"):
+        raise ValueError("Invalid task payload")
+    check, user = run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.update_task(
+            session, dct["name"], dct["password"]
+        ),
+    )
+    if not check:
+        raise ValueError("Invalid credentials")
+    if check:
+        return jwt.encode({"user_id": user.user_id, "time": datetime.datetime.now()})
