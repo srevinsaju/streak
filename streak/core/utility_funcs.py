@@ -3,7 +3,7 @@ import os
 import urllib.parse
 import datetime
 from sqlalchemy import create_engine
-from .models import Tasks
+from .models import Tasks, Users
 from . import models
 
 # The code below inserts new accounts.
@@ -60,6 +60,11 @@ def delete_task(session, task_id):
 
 def get_tasks(session, user_uuid):
     return session.query(Tasks).filter(Tasks.user_id == user_uuid).all()
+
+
+def validate_user_login(session, name, password):
+    user = session.query(Users).filter(Users.name == name).first()
+    return (user.password == password, user)
 
 
 def parse_cmdline():
