@@ -82,7 +82,7 @@ def set_completed(task_uuid):
     return "OK"
 
 
-@app.route("/api/v1/task/<task_uuid>/completed", methods=["POST"])
+@app.route("/api/v1/task/<task_uuid>/reset", methods=["POST"])
 def reset_streak(task_uuid):
     user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
     if not task_uuid:

@@ -1,7 +1,7 @@
 
 import { login, register, isLoggedIn } from './auth'
 import { parseUserId } from './utils'
-import { CreateNewTask, GetTasksList, UpdateTask } from "./api"
+import { CreateNewTask, GetTaskCompletionStatus, GetTasksList, ResetTaskCompletion, SetTaskCompleted, UpdateTask } from "./api"
 import { ListenEventChanges } from './ws'
 
 
@@ -46,7 +46,46 @@ function registerLoginButtonCallback() {
 }
 
 
+function tasksUpdateCompleteStatus() {
+    let tasks = document.querySelectorAll('.streak__card-tasks_card')
+    tasks.forEach(function(task: HTMLElement) {
+        GetTaskCompletionStatus(task.dataset.taskId, function(data: { completed: boolean }) {
+            task.classList.remove('is-loading');
+            if (data.completed) {
+                task.classList.add('is-primary')
+            }
+            task.addEventListener('click', function (data) {
+                task.classList.add('is-loading');
+                if (task.classList.contains('is-primary')) {
+                    ResetTaskCompletion(task.dataset.taskId, function() {
+                        task.classList.remove('is-loading');
+                        task.classList.toggle('is-primary')
+                    }, function(err: Error) {
+                        alert(`Failed to toggle task list ${err}`)
+                    })
+
+                } else {
+                    SetTaskCompleted(task.dataset.taskId, function() {
+                        task.classList.remove('is-loading');
+                        task.classList.toggle('is-primary')
+                    }, function(err: Error) {
+                        alert(`Failed to toggle task list ${err}`)
+                    })
+                }
+                
+            })
+        }, function(err: Error) {
+            console.log(`Failed to get status for task ${err}`)
+            task.classList.remove('is-loading');
+            task.classList.add('is-error')
+        })
+        
+    })
+
+}
+
 function onDefaultPageLoadCallback() {
+
     let newTaskCreateButton = document.getElementById('streak__button-new_task_create');
     let newTaskModalCreateButton = document.getElementById('streak__modal-new_task_create-create');
     let newTaskCloseButton = document.querySelectorAll('.streak__modal-new_task_create-close')
@@ -114,6 +153,8 @@ function onDefaultPageLoadCallback() {
         }
         
     })
+
+    tasksUpdateCompleteStatus()
 
 }
 

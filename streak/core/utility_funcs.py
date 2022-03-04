@@ -56,7 +56,7 @@ def create_streak(session, task_id, user_id):
         ).filter((TaskStreak.timestamp + timedelta(days=1)) > datetime.datetime.now() - timedelta(days=1)
         ).first()
 
-    if previous_task.completed:
+    if previous_task and previous_task.completed:
         # user completed the task yesterday
         streak = previous_task.streak + 1
     else:
@@ -77,7 +77,6 @@ def delete_streak(session, task_id, user_id):
     if task is None:
         raise ValueError("Cannot delete streak, streak does not exist")
     session.delete(task)
-    session.commit()
 
 def has_task_completed(session, task_id, user_id):
     task = session.query(TaskStreak).filter(
