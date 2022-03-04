@@ -11,3 +11,5 @@ for name in (lambda a: not a.startswith("_"), dir(api_post)):
 
 for name in filter(lambda a: not a.startswith("_"), dir(api_get)):
     app.route(f"/api/v1/{name}")(getattr(api_get, name))
+
+

@@ -13,3 +13,6 @@ six==1.16.0
 SQLAlchemy==1.4.31
 sqlalchemy-cockroachdb==1.4.3
 Werkzeug==2.0.3
+
+# env vars
+python-dotenv~=0.19.2
