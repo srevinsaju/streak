@@ -8,12 +8,14 @@ from flask import request
 from sqlalchemy_cockroachdb import run_transaction
 from . import app
 from .core import utility_funcs
+from .core.dbinit import create_tables
 
 db_uri = "placeholder"
 
 try:
     _psycopg_uri = os.getenv("BACKEND_DSN")
     engine = create_engine(_psycopg_uri)
+    create_tables(engine)
 
 except Exception as e:
     print("Failed to connected to database")
@@ -38,4 +40,4 @@ def create():
             session, task_uuid, name, description, schedule, user_uuid
         ),
     )
-    return json.dump({"task": {"id": str(task_uuid)}})
+    return {"task": {"id": str(task_uuid)}}
