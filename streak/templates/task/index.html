@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">
+    {% if task.title is not none %}
+        {{ task.title }}
+    {% else %}
+        Untitled Task 🏃
+    {% endif %}
+      
+    </h1>
+    <h2 class="subtitle">
+    {% if task.description is not none %}
+      {{ task.description }}
+    {% else %} 
+      This task has no description. 
+    {% endif %}
+    </h2>
+    <button id="streak__button-task_edit" class="button is-primary is-light">
+        <span class="icon">
+            <i class="fa fa-edit"></i>
+        </span>
+        <span>
+            Edit Task
+        </span>
+    </button>
+  </div>
+
+  {%include 'modal.html' %}
+
+  <div class="container">
+    <h1 class="title">
+        39 days
+    </h1>
+    <h2 class="subtitle">
+        streak
+    </h2>
+    <p>Alltime highest is {{ task.streak_count }}</p>
+    
+  </div>
+
+  {% with task_modal_mode=update %}
+    {% include 'modal.html' %}
+  {% endwith %}
+</section>
+
+{% endblock %}
