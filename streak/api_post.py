@@ -23,7 +23,7 @@ except Exception as e:
     exit()
 
 
-@app.route("/api/v1/tasks/create", methods=["POST"])
+@app.route("/api/v1/tasks/create", methods=["GET", "POST"])
 def create():
     dct = request.get_json().get("task")
     name = dct.get("name")
@@ -31,7 +31,7 @@ def create():
     schedule = dct.get("schedule")
     if not name or not description or not schedule:
         raise ValueError("Invalid task payload")
-    
+
     user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
     task_uuid = uuid.uuid4()
     run_transaction(
@@ -41,3 +41,28 @@ def create():
         ),
     )
     return {"task": {"id": str(task_uuid)}}
+
+
+@app.route("/api/v1/task/<task_id>/delete", methods=["POST"])
+def delete(task_id):
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.delete_task(uuid.UUID(task_id)),
+    )
+
+
+@app.route("/api/v1/tasks/update", methods=["POST"])
+def update():
+    dct = request.get_json().get("task")
+    task_uuid = dct.get("task_uuid")
+    name = dct.get("name")
+    description = dct.get("description")
+    schedule = dct.get("schedule")
+    if not task_uuid or (not name and not description and not schedule):
+        raise ValueError("Invalid task payload")
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.update_task(
+            session, task_uuid, name, description, schedule
+        ),
+    )

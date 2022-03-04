@@ -58,6 +58,10 @@ def delete_task(session, task_id):
     session.delete(task)
 
 
+def get_tasks(session, user_uuid):
+    return session.query(Tasks).filter(Tasks.user_id == user_uuid).all()
+
+
 def parse_cmdline():
     parser = ArgumentParser()
     parser.add_argument("url", help="Enter your node's connection string\n")
