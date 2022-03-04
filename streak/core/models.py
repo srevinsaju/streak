@@ -34,7 +34,9 @@ class Tasks(Base):
     task_description = Column(Text)
     timestamp = Column(DateTime)
     schedule = Column(Time)
-
+    
+    def __repr__(self) -> str:
+        return f"<Tasks(task_id='{self.task_id}', user_id='{self.user_id}', task_name='{self.task_name}', task_description='{self.task_description}', timestamp='{self.timestamp}', schedule='{self.schedule}')>"
 
 class TaskStreak(Base):
     """The TaskStreak class corresponds to the "task_streak" database table."""

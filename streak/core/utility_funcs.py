@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 import os
+from typing import List
 import urllib.parse
 import datetime
 from sqlalchemy import create_engine
@@ -58,8 +59,11 @@ def delete_task(session, task_id):
     session.delete(task)
 
 
-def get_tasks(session, user_uuid):
+def get_tasks(session, user_uuid) -> List[Tasks]:
     return session.query(Tasks).filter(Tasks.user_id == user_uuid).all()
+
+def get_task(session, user_uuid, task_uuid) -> Tasks:
+    return session.query(Tasks).filter(Tasks.user_id == user_uuid).filter(Tasks.task_id == task_uuid).first()
 
 
 def parse_cmdline():
