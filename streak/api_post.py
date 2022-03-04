@@ -1,22 +1,18 @@
 import json
 import uuid
+import os
 
-from flask import request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_cockroachdb import run_transaction
 
-from core import utility_funcs
+from .core import utility_funcs
 
 db_uri = "placeholder"
 
 try:
-    psycopg_uri = (
-        db_uri.replace("postgresql://", "cockroachdb://")
-        .replace("postgres://", "cockroachdb://")
-        .replace("26257?", "26257/bank?")
-    )
-    engine = create_engine(psycopg_uri)
+    _psycopg_uri = os.getenv("BACKEND_DSN")
+    engine = create_engine(_psycopg_uri)
 
 except Exception as e:
     print("Failed to connected to database")
@@ -24,7 +20,7 @@ except Exception as e:
     exit()
 
 
-def create():
+def create(request):
     dct = json.loads(request.body).get("tasks")
     if (
         dct
