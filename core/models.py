@@ -33,7 +33,7 @@ class Tasks(Base):
     task_name = Column(Text)
     task_description = Column(Text)
     timestamp = Column(DateTime)
-    recurrance = Column(Time)
+    schedule = Column(Time)
 
 
 class TaskStreak(Base):

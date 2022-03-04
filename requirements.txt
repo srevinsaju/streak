@@ -1,4 +1,15 @@
+bcrypt==3.2.0
+cffi==1.15.0
+click==8.0.4
+colorama==0.4.4
+Flask==2.0.3
 greenlet==1.1.2
+itsdangerous==2.1.0
+Jinja2==3.0.3
+MarkupSafe==2.1.0
 psycopg2==2.9.3
+pycparser==2.21
+six==1.16.0
 SQLAlchemy==1.4.31
 sqlalchemy-cockroachdb==1.4.3
+Werkzeug==2.0.3

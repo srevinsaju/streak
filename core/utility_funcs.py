@@ -1,21 +1,18 @@
 from argparse import ArgumentParser
 import os
-import uuid
 import urllib.parse
 import datetime
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy_cockroachdb import run_transaction
 from core.models import Tasks
-import models
+from core import models
 
 # The code below inserts new accounts.
 
 
-def create_account(session, name, password):
+def create_account(session, user_uuid, name, password):
     """Create new accounts with random account IDs and default field values"""
     account = models.Users(
-        user_id=uuid.uuid4(),
+        user_id=user_uuid,
         name=name,
         password=models.Users.get_hashed(password),
         last_seen=datetime.datetime.now(),
@@ -24,37 +21,35 @@ def create_account(session, name, password):
     session.add_all([account])
 
 
-def create_task(session, task_name, task_description, recurrance, user_id):
+def create_task(session, task_uuid, task_name, task_description, schedule, user_id):
     """Create new accounts with random account IDs and default field values"""
     task = models.Tasks(
-        task_id=uuid.uuid4(),
+        task_id=task_uuid,
         user_id=user_id,
         task_name=task_name,
         task_description=task_description,
         timestamp=datetime.datetime.now(),
-        recurrance=recurrance,
+        schedule=schedule,
     )
     session.add_all([task])
 
 
-def create_streak(session, task_id, user_id, task_description, recurrance):
+def create_streak(session, streak_uuid, task_id, user_id, task_description, schedule):
     """Create new accounts with random account IDs and default field values"""
     streak = models.Tasks(
-        streak_id=uuid.uuid4(), task_id=task_id, user_id=user_id, streak=0
+        streak_id=streak_uuid, task_id=task_id, user_id=user_id, streak=0
     )
     session.add_all([streak])
 
 
-def update_task(
-    session, task_id, task_name=None, task_description=None, recurrance=None
-):
+def update_task(session, task_id, task_name=None, task_description=None, schedule=None):
     task = session.query(Tasks).filter(Tasks.task_id == task_id).first()
     if task_name:
         task.task_name = task_name
     if task_description:
         task.task_description = task_description
-    if recurrance:
-        task.recurrance = recurrance
+    if schedule:
+        task.schedule = schedule
 
 
 def delete_task(session, task_id):
@@ -97,5 +92,3 @@ if __name__ == "__main__":
         print("Failed to connect to database.")
         print("{0}".format(e))
         exit()
-
-    # run_transaction(sessionmaker(bind=engine), lambda s: create_account(s, 100))
