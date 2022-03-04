@@ -41,6 +41,6 @@ class TaskStreak(Base):
 
     __tablename__ = "task_streak"
     streak_id = Column(UUID(as_uuid=True), primary_key=True)
-    task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.tasks_id"))
+    task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.task_id"))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
     streak = Column(Integer)

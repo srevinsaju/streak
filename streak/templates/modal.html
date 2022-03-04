@@ -29,7 +29,9 @@
               {% if task %}
                     value="{{ task.schedule }}"
               {% endif %}
-              class="input" type="text" placeholder="09:00">
+              class="input" 
+              id="streak__modal-new_task_create-schedule"
+              type="text" placeholder="09:00">
             </div>
           </div>
           
@@ -40,6 +42,7 @@
               {% if task %}
                 value="{{ task.description }}" 
               {% endif %} 
+              id="streak__modal-new_task_create-description"
               placeholder="I will break all milestones with this task!"></textarea>
             </div>
           </div>
