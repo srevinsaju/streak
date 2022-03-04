@@ -16,3 +16,6 @@ Werkzeug==2.0.3
 
 # env vars
 python-dotenv~=0.19.2
+
+# database migrations 
+alembic~=1.7.9

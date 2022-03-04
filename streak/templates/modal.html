@@ -16,7 +16,7 @@
             <div class="control">
               <input required 
               {% if task %}
-                    value="{{ task.name }}"
+                    value="{{ task.task_name }}"
               {% endif %}
               id="streak__modal-new_task_create-title" class="input" type="text" placeholder="My awesome task!">
             </div>
@@ -40,7 +40,7 @@
             <div class="control">
               <textarea class="textarea" 
               {% if task %}
-                value="{{ task.description }}" 
+                value="{{ task.task_description }}" 
               {% endif %} 
               id="streak__modal-new_task_create-description"
               placeholder="I will break all milestones with this task!"></textarea>

@@ -1,7 +1,7 @@
 
 import { login, register, isLoggedIn } from './auth'
 import { parseUserId } from './utils'
-import { CreateNewTask, GetTasksList } from "./api"
+import { CreateNewTask, GetTasksList, UpdateTask } from "./api"
 import { ListenEventChanges } from './ws'
 
 
@@ -55,6 +55,8 @@ function onDefaultPageLoadCallback() {
     newTaskCreateButton.addEventListener('click', function () {
         newTaskModal.classList.add('is-active');
     })
+
+
     newTaskCloseButton.forEach(function(elem: HTMLElement) {
         elem.addEventListener('click', function () {
             newTaskModal.classList.remove('is-active');
@@ -68,23 +70,49 @@ function onDefaultPageLoadCallback() {
     let newTaskModalMetaDescription = <HTMLInputElement>document.getElementById("streak__modal-new_task_create-description");
     newTaskModalCreateButton.addEventListener('click', function () {
         newTaskModalCreateButton.classList.add('is-loading');
-        // the user hit the create task button 
-        CreateNewTask(
-            newTaskModalMetaTitle.value,
-            newTaskModalMetaSchedule.value,
-            newTaskModalMetaDescription.value,
-            function() {
-                
-                newTaskModalCreateButton.classList.remove('is-loading');
-                newTaskModal.classList.remove('is-active');
-                // move to something like an inline html alert
-                alert('Success! Your task has been created!')
-            },
-            function(e: Error) {
-                newTaskModalCreateButton.classList.remove('is-loading');
-                alert(`Something went wrong! I couldn't create a task for you 😔. ${e}`)
-            },
-        )
+        
+        if (/\/task\/.*/.test(window.location.pathname)) {
+            // we need to update the task details
+            UpdateTask(
+                newTaskCreateButton.dataset.taskId ,
+                newTaskModalMetaTitle.value,
+                newTaskModalMetaSchedule.value,
+                newTaskModalMetaDescription.value,
+                function() {
+                    
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    newTaskModal.classList.remove('is-active');
+                    // move to something like an inline html alert
+                    location.reload();
+                },
+                function(e: Error) {
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    alert(`Something went wrong! I couldn't create a task for you 😔. ${e}`)
+                },
+            )
+
+        } else {
+            // the user hit the create task button 
+            CreateNewTask(
+                newTaskModalMetaTitle.value,
+                newTaskModalMetaSchedule.value,
+                newTaskModalMetaDescription.value,
+                function() {
+                    
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    newTaskModal.classList.remove('is-active');
+                    // refresh the page so that the UI is updated
+                    location.reload();
+
+                },
+                function(e: Error) {
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    alert(`Something went wrong! I couldn't create a task for you 😔. ${e}`)
+                },
+            )
+
+        }
+        
     })
 
 }
@@ -109,6 +137,7 @@ export function registerAllCallbacks() {
             break;
         case  /\/task\/.*/.test(window.location.pathname):
             onDefaultPageLoadCallback()
+            navBarSetup()
             break;
         case /\//.test(window.location.pathname):
             onDefaultPageLoadCallback()

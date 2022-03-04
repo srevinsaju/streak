@@ -51,10 +51,9 @@ def delete(task_id):
     )
 
 
-@app.route("/api/v1/tasks/update", methods=["POST"])
-def update():
+@app.route("/api/v1/task/<task_uuid>/update", methods=["POST"])
+def update(task_uuid):
     dct = request.get_json().get("task")
-    task_uuid = dct.get("task_uuid")
     name = dct.get("name")
     description = dct.get("description")
     schedule = dct.get("schedule")
@@ -66,3 +65,32 @@ def update():
             session, task_uuid, name, description, schedule
         ),
     )
+    return "OK"
+
+
+@app.route("/api/v1/task/<task_uuid>/completed", methods=["POST"])
+def set_completed(task_uuid):
+    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    if not task_uuid:
+        raise ValueError("Invalid task payload")
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.create_streak(
+            session, task_uuid, user_uuid
+        ),
+    )
+    return "OK"
+
+
+@app.route("/api/v1/task/<task_uuid>/completed", methods=["POST"])
+def reset_streak(task_uuid):
+    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    if not task_uuid:
+        raise ValueError("Invalid task payload")
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.delete_streak(
+            session, task_uuid, user_uuid
+        ),
+    )
+    return "OK"

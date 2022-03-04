@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Text, DateTime, ForeignKey, Time
+from sqlalchemy import Column, Boolean, Integer, Text, DateTime, ForeignKey, Time
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
 import bcrypt
@@ -45,4 +45,12 @@ class TaskStreak(Base):
     streak_id = Column(UUID(as_uuid=True), primary_key=True)
     task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.task_id"))
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
+
+    # an integer which represents the number of days in streak
     streak = Column(Integer)
+
+    # the time when the streak was last updated
+    timestamp = Column(DateTime)
+    # has the task for the time period completed?
+    completed = Column(Boolean)
+
