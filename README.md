@@ -8,3 +8,8 @@ and add the appropriate values there.
 ```bash
 BACKEND_DSN="postgres://...."
 ```
+
+## Run 
+```bash 
+python -m streak
+```

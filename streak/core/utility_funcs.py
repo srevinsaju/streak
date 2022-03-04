@@ -3,8 +3,8 @@ import os
 import urllib.parse
 import datetime
 from sqlalchemy import create_engine
-from core.models import Tasks
-from core import models
+from .models import Tasks
+from . import models
 
 # The code below inserts new accounts.
 
