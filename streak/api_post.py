@@ -4,8 +4,9 @@ import os
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from flask import request
 from sqlalchemy_cockroachdb import run_transaction
-
+from . import app
 from .core import utility_funcs
 
 db_uri = "placeholder"
@@ -20,20 +21,21 @@ except Exception as e:
     exit()
 
 
-def create(request):
-    dct = json.loads(request.body).get("tasks")
-    if (
-        dct
-        and (name := dct.get("name"))
-        and (description := dct.get("description"))
-        and (schedule := dct.get("schedule"))
-    ):
-        user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
-        task_uuid = uuid.uuid4()
-        run_transaction(
-            sessionmaker(bind=engine),
-            lambda session: utility_funcs.create_task(
-                session, task_uuid, name, description, schedule, user_uuid
-            ),
-        )
+@app.route("/api/v1/tasks/create", methods=["POST"])
+def create():
+    dct = request.get_json().get("task")
+    name = dct.get("name")
+    description = dct.get("description")
+    schedule = dct.get("schedule")
+    if not name or not description or not schedule:
+        raise ValueError("Invalid task payload")
+    
+    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    task_uuid = uuid.uuid4()
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.create_task(
+            session, task_uuid, name, description, schedule, user_uuid
+        ),
+    )
     return json.dump({"task": {"id": str(task_uuid)}})
