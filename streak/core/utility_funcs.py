@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from ..exceptions import AuthenticationError
 from .models import Friends, Tasks, TaskStreak, Users
 from . import models
+from sqlalchemy import func
 
 # The code below inserts new accounts.
 
@@ -30,7 +31,14 @@ def create_account(session, user_uuid, username, name, password):
     session.add_all([account])
 
 
-def create_task(session, task_uuid: uuid.UUID, task_name: str, task_description: str, schedule, user_id: uuid.UUID):
+def create_task(
+    session,
+    task_uuid: uuid.UUID,
+    task_name: str,
+    task_description: str,
+    schedule,
+    user_id: uuid.UUID,
+):
     task = models.Tasks(
         task_id=task_uuid,
         user_id=user_id,
@@ -146,6 +154,7 @@ def get_task(session, user_uuid, task_uuid) -> Tasks:
         .first()
     )
 
+
 def get_userid_from_jwt_token(session, jwt_token: str) -> uuid.UUID:
     payload = jwt.decode(jwt_token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
     return get_user(session, payload["user_id"]).user_id
@@ -153,6 +162,7 @@ def get_userid_from_jwt_token(session, jwt_token: str) -> uuid.UUID:
 
 def get_user(session, user_uuid: uuid.UUID) -> Users:
     return session.query(Users).filter(Users.user_id == user_uuid).first()
+
 
 def get_user_by_name(session, username: str) -> Users:
     return session.query(Users).filter(Users.username == username).first()
@@ -162,7 +172,7 @@ def validate_user_login(session, username, password):
     user = session.query(Users).filter(Users.username == username).first()
     if not user:
         raise AuthenticationError("User does not exist")
-    
+
     return (Users.check_password(user, password), user.user_id)
 
 
@@ -228,6 +238,38 @@ def check_friend(session, user_uuid, friend_uuid):
             .first()
         )
     )
+
+
+def get_max_streak(session, user_uuid):
+    all_time = session.query(func.max(TaskStreak.streak)).filter(
+        TaskStreak.user_id == user_uuid
+    )
+    month = session.query(func.max(TaskStreak.streak)).filter(
+        TaskStreak.user_id
+        == user_uuid & (TaskStreak.timestamp.month() == datetime.today().month())
+    )
+    year = session.query(func.max(TaskStreak.streak)).filter(
+        TaskStreak.user_id
+        == user_uuid & (TaskStreak.timestamp.year() == datetime.today().year())
+    )
+    return all_time, month, year
+
+
+def get_max_streak_task(session, user_uuid, task_uuid):
+    all_time = session.query(func.max(TaskStreak.streak)).filter(
+        (TaskStreak.user_id == user_uuid) & (TaskStreak.task_id == task_uuid)
+    )
+    month = session.query(func.max(TaskStreak.streak)).filter(
+        (TaskStreak.user_id == user_uuid)
+        & (TaskStreak.task_id == task_uuid)
+        & (TaskStreak.timestamp.month() == datetime.today().month())
+    )
+    year = session.query(func.max(TaskStreak.streak)).filter(
+        (TaskStreak.user_id == user_uuid)
+        & (TaskStreak.task_id == task_uuid)
+        & (TaskStreak.timestamp.year() == datetime.today().year())
+    )
+    return all_time, month, year
 
 
 def parse_cmdline():

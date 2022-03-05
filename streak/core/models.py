@@ -27,6 +27,7 @@ class Users(Base):
     def __repr__(self) -> str:
         return f"<Users(user_id={self.user_id}, name={self.name})>"
 
+
 class Tasks(Base):
     """The Tasks class corresponds to the "tasks" database table."""
 
