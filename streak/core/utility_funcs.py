@@ -114,6 +114,11 @@ def validate_user_login(session, name, password):
     return (user.password == password, user)
 
 
+def validate_user_login(session, name, password):
+    user = session.query(Users).filter(Users.name == name).first()
+    return (user.password == password, user)
+
+
 def parse_cmdline():
     parser = ArgumentParser()
     parser.add_argument("url", help="Enter your node's connection string\n")
