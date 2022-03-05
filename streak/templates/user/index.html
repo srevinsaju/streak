@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">
+    {% if user.name is not none %}
+        {{ user.name }}
+    {% else %}
+        Anonymous 🤠
+    {% endif %}
+      
+    </h1>
+    <h2 class="subtitle">
+    {% if user.last_seen is not none %}
+      User last seen at {{ user.last_seen }}
+    {% else %} 
+      User has not accessed the profile yet
+    {% endif %}
+    </h2>
+    <button id="streak__button-new_task_create" data-task-id="{{ user.user_uuid }}" class="button is-primary  mt-5 is-loading">
+        <span class="icon">
+            <i class="fa fa-user-group"></i>
+        </span>
+        <span>
+            Add Friend
+        </span>
+    </button>
+  </div>
+
+
+  <div class="container mt-4">
+
+    
+  </div>
+
+
+</section>
+
+{% endblock %}

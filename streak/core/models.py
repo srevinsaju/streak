@@ -23,6 +23,8 @@ class Users(Base):
     def check_password(self, plain_text_password):
         return bcrypt.checkpw(plain_text_password, self.password)
 
+    def __repr__(self) -> str:
+        return f"<Users(user_id={self.user_id}, name={self.name})>"
 
 class Tasks(Base):
     """The Tasks class corresponds to the "tasks" database table."""

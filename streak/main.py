@@ -33,6 +33,13 @@ def task_view(task_uuid: str):
     print(task)
     return render_template("task/index.html", task=task, **default_render_params)
 
+@app.route("/user/<user_uuid>")
+def user_view(user_uuid: str):
+    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    with sessionmaker(engine)() as session:
+        user = utility_funcs.get_user(session, user_uuid)
+    print(user)
+    return render_template("user/index.html", user=user, **default_render_params)
 
 
 def main():
