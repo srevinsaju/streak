@@ -83,4 +83,12 @@ def login():
     if not check:
         raise ValueError("Invalid credentials")
     if check:
-        return jwt.encode({"user_id": user.user_id, "time": datetime.datetime.now()})
+        return jwt.encode(
+            {
+                "user_id": user.user_id,
+                "password": user.password,
+                "time": str(datetime.datetime.now()),
+            },
+            os.getenv("SECRET_KEY"),
+            algorithm="HS256",
+        )
