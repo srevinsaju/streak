@@ -14,7 +14,7 @@ from .core import utility_funcs
 from .core.dbinit import create_tables
 from functools import wraps
 from flask import make_response, request, redirect, url_for
-
+from urllib.parse import quote
 
 db_uri = "placeholder"
 
@@ -23,7 +23,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
-        not_authorized = redirect(url_for(".login_view", next=request.url))
+        not_authorized = redirect("/login?next=" +  quote(request.path))
         if not request.cookies.get("token"):
             print("No token", request.cookies)
             return not_authorized

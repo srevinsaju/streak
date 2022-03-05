@@ -5,8 +5,6 @@ import os
 
 
 app = Flask(__name__)
-if os.getenv("SERVER_NAME"):
-    app.config["SERVER_NAME"] = os.getenv("SERVER_NAME")
 
 print("Loading environment variables")
 if os.getenv("DOTENV_LOAD_PATH") is not None:
