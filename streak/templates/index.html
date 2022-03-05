@@ -30,6 +30,32 @@
     {% include 'modal.html' %}
   {% endwith %}
 
+  <div class="container mt-4" >
+  {% for task in tasks %}
+    <div class="card my-1" data-task-id="{{ task.task_id }}">
+      <header class="card-header">
+        <p class="card-header-title">
+          {{ task.task_name }}
+        </p>
+
+        <a href="/task/{{ task.task_id }}" class="button my-2" aria-label="more options">
+          <span class="icon">
+            <i class="fa fa-edit" aria-hidden="true"></i>
+          </span>
+        </a>
+
+        <button data-task-id="{{ task.task_id }}" data-task-completed="false" class="button m-2 is-loading streak__card-tasks_card" style="margin: 0.5em"  aria-label="more options">
+          <span class="icon">
+            <i class="fa fa-check" aria-hidden="true"></i>
+          </span>
+        </button>
+        
+      </header>
+    </div>
+    
+  {% endfor %}
+  </div>
+
 </section>
 
 

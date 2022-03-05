@@ -6,7 +6,7 @@
   <div class="container">
     <h1 class="title">
     {% if task.title is not none %}
-        {{ task.title }}
+        {{ task.task_name }}
     {% else %}
         Untitled Task 🏃
     {% endif %}
@@ -14,12 +14,19 @@
     </h1>
     <h2 class="subtitle">
     {% if task.description is not none %}
-      {{ task.description }}
+      {{ task.task_description }}
     {% else %} 
       This task has no description. 
     {% endif %}
     </h2>
-    <button id="streak__button-task_edit" class="button is-primary is-light">
+    <p >
+      {% if task.schedule %}
+        Reminds everyday at {{ task.schedule }}
+      {% else %}
+        No reminders set.
+      {% endif %}
+    </p>
+    <button id="streak__button-new_task_create" data-task-id="{{ task.task_id }}" class="button is-primary is-light mt-5">
         <span class="icon">
             <i class="fa fa-edit"></i>
         </span>
@@ -29,9 +36,8 @@
     </button>
   </div>
 
-  {%include 'modal.html' %}
 
-  <div class="container">
+  <div class="container mt-4">
     <h1 class="title">
         39 days
     </h1>
@@ -42,7 +48,7 @@
     
   </div>
 
-  {% with task_modal_mode=update %}
+  {% with task_modal_mode=update, task=task %}
     {% include 'modal.html' %}
   {% endwith %}
 </section>

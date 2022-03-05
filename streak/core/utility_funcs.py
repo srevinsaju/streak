@@ -1,9 +1,12 @@
 from argparse import ArgumentParser
 import os
+from typing import List
 import urllib.parse
 import datetime
+import uuid
+from datetime import timedelta
 from sqlalchemy import create_engine
-from .models import Tasks, Users
+from .models import Tasks, TaskStreak, Users
 from . import models
 
 # The code below inserts new accounts.
@@ -34,13 +37,54 @@ def create_task(session, task_uuid, task_name, task_description, schedule, user_
     session.add_all([task])
 
 
-def create_streak(session, streak_uuid, task_id, user_id, task_description, schedule):
+def create_streak(session, task_id, user_id):
     """Create new accounts with random account IDs and default field values"""
-    streak = models.Tasks(
-        streak_id=streak_uuid, task_id=task_id, user_id=user_id, streak=0
+
+    task = session.query(TaskStreak).filter(
+        TaskStreak.task_id == task_id
+        ).filter(TaskStreak.user_id == user_id
+        ).filter((TaskStreak.timestamp + datetime.timedelta(days=1)) > datetime.datetime.now()
+        ).first()
+
+    if task is not None:
+        # already have a streak
+        return
+    
+    previous_task = session.query(TaskStreak).filter(
+        TaskStreak.task_id == task_id
+        ).filter(TaskStreak.user_id == user_id
+        ).filter((TaskStreak.timestamp + timedelta(days=1)) > datetime.datetime.now() - timedelta(days=1)
+        ).first()
+
+    if previous_task and previous_task.completed:
+        # user completed the task yesterday
+        streak = previous_task.streak + 1
+    else:
+        streak = 1
+    
+    streak_uuid = uuid.uuid4()
+    streak = models.TaskStreak(
+        streak_id=streak_uuid, task_id=task_id, user_id=user_id, streak=streak, timestamp=datetime.datetime.now(), completed=True
     )
     session.add_all([streak])
 
+def delete_streak(session, task_id, user_id):
+    task = session.query(TaskStreak).filter(
+        TaskStreak.task_id == task_id
+        ).filter(TaskStreak.user_id == user_id
+        ).filter((TaskStreak.timestamp + datetime.timedelta(days=1)) > datetime.datetime.now()
+        ).first()
+    if task is None:
+        raise ValueError("Cannot delete streak, streak does not exist")
+    session.delete(task)
+
+def has_task_completed(session, task_id, user_id):
+    task = session.query(TaskStreak).filter(
+        TaskStreak.task_id == task_id
+        ).filter(TaskStreak.user_id == user_id
+        ).filter((TaskStreak.timestamp + datetime.timedelta(days=1)) > datetime.datetime.now()
+        ).first()
+    return task is not None and task.completed
 
 def update_task(session, task_id, task_name=None, task_description=None, schedule=None):
     task = session.query(Tasks).filter(Tasks.task_id == task_id).first()
@@ -58,8 +102,11 @@ def delete_task(session, task_id):
     session.delete(task)
 
 
-def get_tasks(session, user_uuid):
+def get_tasks(session, user_uuid) -> List[Tasks]:
     return session.query(Tasks).filter(Tasks.user_id == user_uuid).all()
+
+def get_task(session, user_uuid, task_uuid) -> Tasks:
+    return session.query(Tasks).filter(Tasks.user_id == user_uuid).filter(Tasks.task_id == task_uuid).first()
 
 
 def validate_user_login(session, name, password):

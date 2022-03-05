@@ -1,7 +1,7 @@
 
 import { login, register, isLoggedIn } from './auth'
 import { parseUserId } from './utils'
-import { CreateNewTask, GetTasksList } from "./api"
+import { CreateNewTask, GetTaskCompletionStatus, GetTasksList, ResetTaskCompletion, SetTaskCompleted, UpdateTask } from "./api"
 import { ListenEventChanges } from './ws'
 
 
@@ -46,7 +46,46 @@ function registerLoginButtonCallback() {
 }
 
 
+function tasksUpdateCompleteStatus() {
+    let tasks = document.querySelectorAll('.streak__card-tasks_card')
+    tasks.forEach(function(task: HTMLElement) {
+        GetTaskCompletionStatus(task.dataset.taskId, function(data: { completed: boolean }) {
+            task.classList.remove('is-loading');
+            if (data.completed) {
+                task.classList.add('is-primary')
+            }
+            task.addEventListener('click', function (data) {
+                task.classList.add('is-loading');
+                if (task.classList.contains('is-primary')) {
+                    ResetTaskCompletion(task.dataset.taskId, function() {
+                        task.classList.remove('is-loading');
+                        task.classList.toggle('is-primary')
+                    }, function(err: Error) {
+                        alert(`Failed to toggle task list ${err}`)
+                    })
+
+                } else {
+                    SetTaskCompleted(task.dataset.taskId, function() {
+                        task.classList.remove('is-loading');
+                        task.classList.toggle('is-primary')
+                    }, function(err: Error) {
+                        alert(`Failed to toggle task list ${err}`)
+                    })
+                }
+                
+            })
+        }, function(err: Error) {
+            console.log(`Failed to get status for task ${err}`)
+            task.classList.remove('is-loading');
+            task.classList.add('is-error')
+        })
+        
+    })
+
+}
+
 function onDefaultPageLoadCallback() {
+
     let newTaskCreateButton = document.getElementById('streak__button-new_task_create');
     let newTaskModalCreateButton = document.getElementById('streak__modal-new_task_create-create');
     let newTaskCloseButton = document.querySelectorAll('.streak__modal-new_task_create-close')
@@ -55,6 +94,8 @@ function onDefaultPageLoadCallback() {
     newTaskCreateButton.addEventListener('click', function () {
         newTaskModal.classList.add('is-active');
     })
+
+
     newTaskCloseButton.forEach(function(elem: HTMLElement) {
         elem.addEventListener('click', function () {
             newTaskModal.classList.remove('is-active');
@@ -68,24 +109,52 @@ function onDefaultPageLoadCallback() {
     let newTaskModalMetaDescription = <HTMLInputElement>document.getElementById("streak__modal-new_task_create-description");
     newTaskModalCreateButton.addEventListener('click', function () {
         newTaskModalCreateButton.classList.add('is-loading');
-        // the user hit the create task button 
-        CreateNewTask(
-            newTaskModalMetaTitle.value,
-            newTaskModalMetaSchedule.value,
-            newTaskModalMetaDescription.value,
-            function() {
-                
-                newTaskModalCreateButton.classList.remove('is-loading');
-                newTaskModal.classList.remove('is-active');
-                // move to something like an inline html alert
-                alert('Success! Your task has been created!')
-            },
-            function(e: Error) {
-                newTaskModalCreateButton.classList.remove('is-loading');
-                alert(`Something went wrong! I couldn't create a task for you 😔. ${e}`)
-            },
-        )
+        
+        if (/\/task\/.*/.test(window.location.pathname)) {
+            // we need to update the task details
+            UpdateTask(
+                newTaskCreateButton.dataset.taskId ,
+                newTaskModalMetaTitle.value,
+                newTaskModalMetaSchedule.value,
+                newTaskModalMetaDescription.value,
+                function() {
+                    
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    newTaskModal.classList.remove('is-active');
+                    // move to something like an inline html alert
+                    location.reload();
+                },
+                function(e: Error) {
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    alert(`Something went wrong! I couldn't create a task for you 😔. ${e}`)
+                },
+            )
+
+        } else {
+            // the user hit the create task button 
+            CreateNewTask(
+                newTaskModalMetaTitle.value,
+                newTaskModalMetaSchedule.value,
+                newTaskModalMetaDescription.value,
+                function() {
+                    
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    newTaskModal.classList.remove('is-active');
+                    // refresh the page so that the UI is updated
+                    location.reload();
+
+                },
+                function(e: Error) {
+                    newTaskModalCreateButton.classList.remove('is-loading');
+                    alert(`Something went wrong! I couldn't create a task for you 😔. ${e}`)
+                },
+            )
+
+        }
+        
     })
+
+    tasksUpdateCompleteStatus()
 
 }
 
@@ -109,6 +178,7 @@ export function registerAllCallbacks() {
             break;
         case  /\/task\/.*/.test(window.location.pathname):
             onDefaultPageLoadCallback()
+            navBarSetup()
             break;
         case /\//.test(window.location.pathname):
             onDefaultPageLoadCallback()

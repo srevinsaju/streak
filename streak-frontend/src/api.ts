@@ -40,6 +40,51 @@ export function CreateNewTask(name: string, schedule: string, description: strin
     }).catch(e => { error(e) });
 }
 
+
+// GRT /api/v1/task/:task_id/update
+export function UpdateTask(task_id: string, name: string, schedule: string, description: string, success: Function, error: Function) {
+    if (name == "" || schedule == "" || task_id == "") {
+        error("Make sure that all the fields are filled.")
+        return
+    }
+    getClient().post(`/task/${task_id}/update`, {
+        "task": {
+            "name": name,
+            "schedule": schedule,
+            "description": description,
+        },
+    }
+    ).then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+
+// GET /api/v1/task/:task_id/completed
+export function GetTaskCompletionStatus(task_id: string, success: Function, error: Function) {
+    getClient().get(`/task/${task_id}/completed`)
+    .then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+// POST /api/v1/task/:task_id/completed
+export function SetTaskCompleted(task_id: string, success: Function, error: Function) {
+    getClient().post(`/task/${task_id}/completed`)
+    .then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+
+// POST /api/v1/task/:task_id/reset
+export function ResetTaskCompletion(task_id: string, success: Function, error: Function) {
+    getClient().post(`/task/${task_id}/reset`)
+    .then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
 export function GetTasksList(success: Function, error: Function) {
     let data = [
         {
