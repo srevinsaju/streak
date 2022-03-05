@@ -11,14 +11,15 @@ from ..exceptions import AuthenticationError
 from .models import Friends, Tasks, TaskStreak, Users
 from . import models
 from sqlalchemy import func
-
-# The code below inserts new accounts.
+from .events import event_wrapper
 
 
 def check_account_exists(session, username):
     return bool(session.query(Users).filter(Users.username == username).first())
 
 
+# The code below inserts new accounts.
+@event_wrapper("create_account")
 def create_account(session, user_uuid, username, name, password):
     account = models.Users(
         user_id=user_uuid,
@@ -31,6 +32,7 @@ def create_account(session, user_uuid, username, name, password):
     session.add_all([account])
 
 
+@event_wrapper("create_task")
 def create_task(
     session,
     task_uuid: uuid.UUID,
@@ -50,6 +52,7 @@ def create_task(
     session.add_all([task])
 
 
+@event_wrapper("create_streak")
 def create_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
 
     task = (
@@ -96,6 +99,7 @@ def create_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
     session.add_all([streak])
 
 
+@event_wrapper("delete_streak")
 def delete_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
     task = (
         session.query(TaskStreak)
@@ -126,6 +130,7 @@ def has_task_completed(session, task_id: uuid.UUID, user_id: uuid.UUID) -> bool:
     return task is not None and task.completed
 
 
+@event_wrapper("update_task")
 def task_streak_status(session, task_id: uuid.UUID, user_id: uuid.UUID) -> bool:
     task = (
         session.query(TaskStreak)
@@ -142,6 +147,7 @@ def task_streak_status(session, task_id: uuid.UUID, user_id: uuid.UUID) -> bool:
     return task.streak
 
 
+@event_wrapper("update_task")
 def update_task(session, task_id, task_name=None, task_description=None, schedule=None):
     task = session.query(Tasks).filter(Tasks.task_id == task_id).first()
     if task_name:
@@ -152,6 +158,7 @@ def update_task(session, task_id, task_name=None, task_description=None, schedul
         task.schedule = schedule
 
 
+@event_wrapper("delete_task")
 def delete_task(session, task_id):
     """Delete a task, given task id"""
     task = session.query(Tasks).filter(Tasks.task_id == task_id).first()
@@ -209,6 +216,7 @@ def get_friends(session, user_uuid):
 
 
 # add friend
+@event_wrapper("add_friend")
 def add_friend(session, user_uuid, friend_uuid):
     if check_friend(session, user_uuid, friend_uuid):
         raise ValueError("Already friends")
@@ -216,6 +224,7 @@ def add_friend(session, user_uuid, friend_uuid):
     session.add_all([data])
 
 
+@event_wrapper("remove_friend")
 def remove_friend(session, user_uuid, friend_uuid):
     friend = (
         session.query(Friends)
