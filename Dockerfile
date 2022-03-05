@@ -7,4 +7,4 @@ RUN sed -i 's,psycopg2,psycopg2-binary,g' requirements.txt && \
 COPY . .
 EXPOSE 5000
 ENV FLASK_APP=streak.main:app
-ENTRYPOINT ["flask", "run"]
+ENTRYPOINT ["flask", "run", "--host", "0.0.0.0"]
