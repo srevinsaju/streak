@@ -9,6 +9,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
@@ -39,6 +41,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
@@ -66,6 +70,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
@@ -84,6 +90,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
@@ -102,6 +110,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
@@ -123,6 +133,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
@@ -141,6 +153,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
@@ -159,6 +173,8 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
+                # TODO remove this return
+                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
