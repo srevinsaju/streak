@@ -6,18 +6,20 @@ import datetime
 import uuid
 from datetime import timedelta
 import jwt
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, extract
 from ..exceptions import AuthenticationError
 from .models import Friends, Tasks, TaskStreak, Users
 from . import models
-
-# The code below inserts new accounts.
+from sqlalchemy import func
+from .events import event_wrapper
 
 
 def check_account_exists(session, username):
     return bool(session.query(Users).filter(Users.username == username).first())
 
 
+# The code below inserts new accounts.
+@event_wrapper("create_account")
 def create_account(session, user_uuid, username, name, password):
     account = models.Users(
         user_id=user_uuid,
@@ -30,7 +32,15 @@ def create_account(session, user_uuid, username, name, password):
     session.add_all([account])
 
 
-def create_task(session, task_uuid: uuid.UUID, task_name: str, task_description: str, schedule, user_id: uuid.UUID):
+@event_wrapper("create_task")
+def create_task(
+    session,
+    task_uuid: uuid.UUID,
+    task_name: str,
+    task_description: str,
+    schedule,
+    user_id: uuid.UUID,
+):
     task = models.Tasks(
         task_id=task_uuid,
         user_id=user_id,
@@ -42,6 +52,7 @@ def create_task(session, task_uuid: uuid.UUID, task_name: str, task_description:
     session.add_all([task])
 
 
+@event_wrapper("create_streak")
 def create_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
 
     task = (
@@ -88,6 +99,7 @@ def create_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
     session.add_all([streak])
 
 
+@event_wrapper("delete_streak")
 def delete_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
     task = (
         session.query(TaskStreak)
@@ -118,6 +130,24 @@ def has_task_completed(session, task_id: uuid.UUID, user_id: uuid.UUID) -> bool:
     return task is not None and task.completed
 
 
+@event_wrapper("update_task")
+def task_streak_status(session, task_id: uuid.UUID, user_id: uuid.UUID) -> bool:
+    task = (
+        session.query(TaskStreak)
+        .filter(TaskStreak.task_id == task_id)
+        .filter(TaskStreak.user_id == user_id)
+        .filter(
+            (TaskStreak.timestamp + datetime.timedelta(days=1))
+            > datetime.datetime.now()
+        )
+        .first()
+    )
+    if task is None:
+        return 0
+    return task.streak
+
+
+@event_wrapper("update_task")
 def update_task(session, task_id, task_name=None, task_description=None, schedule=None):
     task = session.query(Tasks).filter(Tasks.task_id == task_id).first()
     if task_name:
@@ -128,6 +158,7 @@ def update_task(session, task_id, task_name=None, task_description=None, schedul
         task.schedule = schedule
 
 
+@event_wrapper("delete_task")
 def delete_task(session, task_id):
     """Delete a task, given task id"""
     task = session.query(Tasks).filter(Tasks.task_id == task_id).first()
@@ -146,6 +177,7 @@ def get_task(session, user_uuid, task_uuid) -> Tasks:
         .first()
     )
 
+
 def get_userid_from_jwt_token(session, jwt_token: str) -> uuid.UUID:
     payload = jwt.decode(jwt_token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
     return get_user(session, payload["user_id"]).user_id
@@ -153,6 +185,7 @@ def get_userid_from_jwt_token(session, jwt_token: str) -> uuid.UUID:
 
 def get_user(session, user_uuid: uuid.UUID) -> Users:
     return session.query(Users).filter(Users.user_id == user_uuid).first()
+
 
 def get_user_by_name(session, username: str) -> Users:
     return session.query(Users).filter(Users.username == username).first()
@@ -162,7 +195,7 @@ def validate_user_login(session, username, password):
     user = session.query(Users).filter(Users.username == username).first()
     if not user:
         raise AuthenticationError("User does not exist")
-    
+
     return (Users.check_password(user, password), user.user_id)
 
 
@@ -183,6 +216,7 @@ def get_friends(session, user_uuid):
 
 
 # add friend
+@event_wrapper("add_friend")
 def add_friend(session, user_uuid, friend_uuid):
     if check_friend(session, user_uuid, friend_uuid):
         raise ValueError("Already friends")
@@ -190,6 +224,7 @@ def add_friend(session, user_uuid, friend_uuid):
     session.add_all([data])
 
 
+@event_wrapper("remove_friend")
 def remove_friend(session, user_uuid, friend_uuid):
     friend = (
         session.query(Friends)
@@ -228,6 +263,41 @@ def check_friend(session, user_uuid, friend_uuid):
             .first()
         )
     )
+
+
+def get_max_streak(session, user_uuid):
+    all_time = session.query(func.max(TaskStreak.streak)
+        ).filter(TaskStreak.user_id == user_uuid).first()
+    month = session.query(func.max(TaskStreak.streak)
+        ).filter(TaskStreak.user_id == user_uuid
+        ).filter(extract('month', TaskStreak.timestamp) == datetime.date.today().month).first()
+    
+    year = session.query(func.max(TaskStreak.streak)
+        ).filter(TaskStreak.user_id == user_uuid
+        ).filter(extract('year', TaskStreak.timestamp) == datetime.date.today().year).first()
+    all_time = 0 if len(all_time) == 0 else all_time[0]
+    month = 0 if len(month) == 0 else month[0]
+    year = 0 if len(year) == 0 else year[0]
+    return all_time, month, year
+
+
+def get_max_streak_task(session, user_uuid, task_uuid):
+    all_time = session.query(func.max(TaskStreak.streak)
+        ).filter(TaskStreak.user_id == user_uuid
+        ).filter(TaskStreak.task_id == task_uuid).first()
+    month = session.query(func.max(TaskStreak.streak)
+        ).filter(TaskStreak.user_id == user_uuid
+        ).filter(TaskStreak.task_id == task_uuid
+        ).filter(extract('month', TaskStreak.timestamp) == datetime.date.today().month).first()
+    
+    year = session.query(func.max(TaskStreak.streak)
+        ).filter(TaskStreak.user_id == user_uuid
+        ).filter(TaskStreak.task_id == task_uuid
+        ).filter(extract('year', TaskStreak.timestamp) == datetime.date.today().year).first()
+    all_time = 0 if len(all_time) == 0 else all_time[0]
+    month = 0 if len(month) == 0 else month[0]
+    year = 0 if len(year) == 0 else year[0]
+    return all_time, month, year
 
 
 def parse_cmdline():

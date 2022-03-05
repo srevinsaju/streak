@@ -4,6 +4,8 @@
 {% include 'navbar.html' %}
 <section class="section">
   <div class="container">
+    <img style="border-radius: 50%; height: 4em" src="https://icotar.com/avatar/@{{ user.username }}">
+    
     <h1 class="title">
     {% if user.name is not none %}
         {{ user.name }}
@@ -32,6 +34,12 @@
 
   <div class="container mt-4">
 
+    <p>Monthly</p>
+    <progress class="progress is-primary" value="{{ monthly_percentage }}" max="100">15%</progress>
+    <p>Yearly</p>
+    <progress class="progress is-link" value="{{ yearly_percentage }}" max="100">15%</progress>
+    <p>All Time</p>
+    <progress class="progress is-danger" value="{{ alltime_percentage }}" max="100">15%</progress>
     
   </div>
 

@@ -93,6 +93,26 @@ export function GetTaskCompletionStatus(task_id: string, success: Function, erro
     }).catch(e => { error(e) });
 }
 
+// GET /api/v1/task/:task_id/current-streak
+export function GetMaxTaskStreakStatus(task_id: string, success: Function, error: Function) {
+    getClient().get(`/task/${task_id}/maximum`)
+    .then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+
+
+
+// GET /api/v1/task/:task_id/current-streak
+export function GetTaskStreakStatus(task_id: string, success: Function, error: Function) {
+    getClient().get(`/task/${task_id}/current-streak`)
+    .then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+
 // POST /api/v1/task/:task_id/completed
 export function SetTaskCompleted(task_id: string, success: Function, error: Function) {
     getClient().post(`/task/${task_id}/completed`)
