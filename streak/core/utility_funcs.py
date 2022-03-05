@@ -241,33 +241,59 @@ def check_friend(session, user_uuid, friend_uuid):
 
 
 def get_max_streak(session, user_uuid):
-    all_time = session.query(func.max(TaskStreak.streak)).filter(
-        TaskStreak.user_id == user_uuid
+    all_time = (
+        session.query(func.max(TaskStreak.streak))
+        .filter(TaskStreak.user_id == user_uuid)
+        .first()
+        .streak
     )
-    month = session.query(func.max(TaskStreak.streak)).filter(
-        TaskStreak.user_id
-        == user_uuid & (TaskStreak.timestamp.month() == datetime.today().month())
+    month = (
+        session.query(func.max(TaskStreak.streak))
+        .filter(
+            TaskStreak.user_id
+            == user_uuid & (TaskStreak.timestamp.month() == datetime.today().month())
+        )
+        .first()
+        .streak
     )
-    year = session.query(func.max(TaskStreak.streak)).filter(
-        TaskStreak.user_id
-        == user_uuid & (TaskStreak.timestamp.year() == datetime.today().year())
+    year = (
+        session.query(func.max(TaskStreak.streak))
+        .filter(
+            TaskStreak.user_id
+            == user_uuid & (TaskStreak.timestamp.year() == datetime.today().year())
+        )
+        .first()
+        .streak
     )
     return all_time, month, year
 
 
 def get_max_streak_task(session, user_uuid, task_uuid):
-    all_time = session.query(func.max(TaskStreak.streak)).filter(
-        (TaskStreak.user_id == user_uuid) & (TaskStreak.task_id == task_uuid)
+    all_time = (
+        session.query(func.max(TaskStreak.streak))
+        .filter((TaskStreak.user_id == user_uuid) & (TaskStreak.task_id == task_uuid))
+        .first()
+        .streak
     )
-    month = session.query(func.max(TaskStreak.streak)).filter(
-        (TaskStreak.user_id == user_uuid)
-        & (TaskStreak.task_id == task_uuid)
-        & (TaskStreak.timestamp.month() == datetime.today().month())
+    month = (
+        session.query(func.max(TaskStreak.streak))
+        .filter(
+            (TaskStreak.user_id == user_uuid)
+            & (TaskStreak.task_id == task_uuid)
+            & (TaskStreak.timestamp.month() == datetime.today().month())
+        )
+        .first()
+        .streak
     )
-    year = session.query(func.max(TaskStreak.streak)).filter(
-        (TaskStreak.user_id == user_uuid)
-        & (TaskStreak.task_id == task_uuid)
-        & (TaskStreak.timestamp.year() == datetime.today().year())
+    year = (
+        session.query(func.max(TaskStreak.streak))
+        .filter(
+            (TaskStreak.user_id == user_uuid)
+            & (TaskStreak.task_id == task_uuid)
+            & (TaskStreak.timestamp.year() == datetime.today().year())
+        )
+        .first()
+        .streak
     )
     return all_time, month, year
 
