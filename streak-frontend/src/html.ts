@@ -6,16 +6,15 @@ import { ListenEventChanges } from './ws'
 
 
 function registerHtmlCallback() {
-    let userId = (<HTMLInputElement>document.getElementById('userId')).value
+    let username = (<HTMLInputElement>document.getElementById('userId')).value
     let password = (<HTMLInputElement>document.getElementById('password')).value
     let confirmedPassword = (<HTMLInputElement>document.getElementById('confirm_password')).value
     if (password != confirmedPassword) {
         alert('Passwords do not match')
         return
     }
-    let parsed = parseUserId(userId)
 
-    register(parsed.username, password, parsed.hostname, function() {
+    register(username, password, function() {
         window.location.replace("/login");
     }, 
     function() {
@@ -28,8 +27,14 @@ function loginHtmlCallback() {
     let userId = (<HTMLInputElement>document.getElementById('userId')).value
     let password = (<HTMLInputElement>document.getElementById('password')).value
     let parsed = parseUserId(userId)
-    login(parsed.username, password, parsed.hostname, function() {
-        window.location.replace("/");
+    login(parsed.username, password, function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const next = urlParams.get('next');
+        let nextUrl = "/"
+        if (next != null && next != "") {
+            nextUrl = decodeURI(next)
+        }
+        window.location.replace(next);
     }, function() {
 
     alert('Login failed')

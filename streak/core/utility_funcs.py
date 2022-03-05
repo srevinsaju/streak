@@ -5,6 +5,7 @@ import urllib.parse
 import datetime
 import uuid
 from datetime import timedelta
+import jwt
 from sqlalchemy import create_engine
 from .models import Tasks, TaskStreak, Users
 from . import models
@@ -17,7 +18,7 @@ def create_account(session, user_uuid, name, password):
     account = models.Users(
         user_id=user_uuid,
         name=name,
-        password=models.Users.get_hashed(password),
+        password=models.Users.get_hashed_password(password),
         last_seen=datetime.datetime.now(),
         last_checked_events=datetime.datetime.now(),
     )
@@ -141,6 +142,10 @@ def get_task(session, user_uuid, task_uuid) -> Tasks:
         .first()
     )
 
+def get_user_from_jwt_token(session, jwt_token: str):
+    payload = jwt.decode(jwt_token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
+    return get_user(session, payload["user_id"])
+
 
 def get_user(session, user_uuid) -> Users:
     return session.query(Users).filter(Tasks.user_id == user_uuid).first()
@@ -148,7 +153,10 @@ def get_user(session, user_uuid) -> Users:
 
 def validate_user_login(session, name, password):
     user = session.query(Users).filter(Users.name == name).first()
-    return (user.password == password, user)
+    if not user:
+        raise ValueError("User does not exist")
+    
+    return (Users.check_password(user, password), user.user_id)
 
 
 def parse_cmdline():

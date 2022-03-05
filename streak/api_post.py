@@ -5,13 +5,33 @@ import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from flask import request
+from flask import make_response, request
 from sqlalchemy_cockroachdb import run_transaction
 from . import app
 from .core import utility_funcs
 from .core.dbinit import create_tables
+from functools import wraps
+from flask import g, request, redirect, url_for
+from sqlalchemy_cockroachdb import run_transaction
 
 db_uri = "placeholder"
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+       
+        not_authorized = redirect(url_for('login_view', next=request.url))
+        if not request.cookies.get("token"):
+            return not_authorized
+        user = run_transaction(
+            sessionmaker(bind=engine),
+            lambda session: utility_funcs.get_user_from_jwt_token(session, request.cookies.get("token")),
+        )
+        if not user:
+            return not_authorized
+        request.environ["user_id"] = user
+        return f(*args, **kwargs)
+    return decorated_function
 
 try:
     _psycopg_uri = os.getenv("BACKEND_DSN")
@@ -25,6 +45,7 @@ except Exception as e:
 
 
 @app.route("/api/v1/tasks/create", methods=["POST"])
+@login_required
 def create():
     dct = request.get_json().get("task")
     name = dct.get("name")
@@ -45,6 +66,7 @@ def create():
 
 
 @app.route("/api/v1/task/<task_id>/delete", methods=["POST"])
+@login_required
 def delete(task_id):
     run_transaction(
         sessionmaker(bind=engine),
@@ -54,6 +76,7 @@ def delete(task_id):
 
 
 @app.route("/api/v1/task/<task_uuid>/update", methods=["POST"])
+@login_required
 def update(task_uuid):
     dct = request.get_json().get("task")
     name = dct.get("name")
@@ -71,6 +94,7 @@ def update(task_uuid):
 
 
 @app.route("/api/v1/task/<task_uuid>/completed", methods=["POST"])
+@login_required
 def set_completed(task_uuid):
     user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
     if not task_uuid:
@@ -83,6 +107,7 @@ def set_completed(task_uuid):
 
 
 @app.route("/api/v1/task/<task_uuid>/reset", methods=["POST"])
+@login_required
 def reset_streak(task_uuid):
     user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
     if not task_uuid:
@@ -97,27 +122,32 @@ def reset_streak(task_uuid):
 @app.route("/api/v1/login", methods=["POST"])
 def login():
     dct = request.get_json()
+    
     if not dct.get("name") or not dct.get("password"):
         raise ValueError("Invalid task payload")
     check, user = run_transaction(
         sessionmaker(bind=engine),
-        lambda session: utility_funcs.update_task(
+        lambda session: utility_funcs.validate_user_login(
             session, dct["name"], dct["password"]
         ),
     )
     if not check:
         raise ValueError("Invalid credentials")
-    if check:
-        return jwt.encode(
-            {
-                "user_id": user.user_id,
-                "password": user.password,
-                "time": str(datetime.datetime.now()),
-            },
-            os.getenv("SECRET_KEY"),
-            algorithm="HS256",
-        )
-    return "OK"
+    
+    token = jwt.encode(
+        {
+            "user_id": str(user),
+            "time": str(datetime.datetime.now()),
+        },
+        os.getenv("SECRET_KEY"),
+        algorithm="HS256",
+    )
+    resp = make_response({
+        "user_id": str(user),
+        "token": token
+    })
+    resp.set_cookie("token", token)
+    return resp
 
 
 @app.route("/api/v1/register", methods=["POST"])

@@ -22,20 +22,16 @@ export function isLoggedIn(): boolean {
 export function login(
     username: string, 
     password: string,
-    hostname: string, 
     success: Function, 
     error: Function)
 {
-    console.log(`Sending login request to ${hostname}`)
-    let scheme = detectSchemeFromHostname(hostname) 
-    axios.post(`${scheme}://${hostname}/login`, 
+    console.log(`Sending login request to`)
+    axios.post(`/api/v1/login`, 
     {
         "username": username, 
         "password": password
     }).then((res: { data: { token: string; }; }) => {
-        localStorage.setItem('token', res.data.token);
-        localStorage.setItem('username', username);
-        localStorage.setItem('hostname', hostname);
+        console.log(`Login successful`)
         success()
     }).catch((err: any) => {
         console.log(`Failed to send login request: ${err}`);
@@ -46,16 +42,14 @@ export function login(
 export function register(
     username: string, 
     password: string, 
-    hostname: string, 
     success: Function, 
     error: Function)
 {
-    axios.post(`https://${hostname}/register`, 
+    axios.post(`/api/v1/register`, 
     {
         "username": username, 
         "password": password,
     }).then((res: { data: { token: string; }; }) => {
-        res.data.token 
         success()
     }).catch((err: any) => {
         console.log(`Failed to send register request: ${err}`);

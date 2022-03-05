@@ -17,11 +17,11 @@ class Users(Base):
     last_checked_events = Column(DateTime)
 
     @staticmethod
-    def get_hashed_password(plain_text_password):
-        return bcrypt.hashpw(plain_text_password, bcrypt.gensalt())
+    def get_hashed_password(plain_text_password: str):
+        return bcrypt.hashpw(plain_text_password.encode(), bcrypt.gensalt()).decode()
 
-    def check_password(self, plain_text_password):
-        return bcrypt.checkpw(plain_text_password, self.password)
+    def check_password(self, plain_text_password: str):
+        return bcrypt.checkpw(plain_text_password.encode(), self.password.encode())
 
     def __repr__(self) -> str:
         return f"<Users(user_id={self.user_id}, name={self.name})>"

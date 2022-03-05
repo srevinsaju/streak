@@ -3,10 +3,12 @@ from . import api_post
 from . import api_get
 import uuid
 from .api_post import engine
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from . import app
 from sqlalchemy.orm import sessionmaker
+
 from .core import utility_funcs
+from .api_post import login_required
 
 
 default_render_params = {
@@ -16,9 +18,21 @@ default_render_params = {
 }
 
 
+@app.route("/login")
+def login_view():
+    return render_template("login/index.html", **default_render_params)
+
+
+@app.route("/register")
+@login_required
+def register_view():
+    return render_template("register/index.html", **default_render_params)
+
+
 @app.route("/")
+@login_required
 def index():
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = uuid.UUID(request.environ["user_id"])
     with sessionmaker(engine)() as session:
         tasks = utility_funcs.get_tasks(session, user_uuid)
     print(tasks)
@@ -27,7 +41,7 @@ def index():
 
 @app.route("/task/<task_uuid>")
 def task_view(task_uuid: str):
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = uuid.UUID(request.environ["user_id"])
     with sessionmaker(engine)() as session:
         task = utility_funcs.get_task(session, user_uuid, task_uuid)
     print(task)
@@ -35,12 +49,18 @@ def task_view(task_uuid: str):
 
 @app.route("/user/<user_uuid>")
 def user_view(user_uuid: str):
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = uuid.UUID(request.environ["user_id"])
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user(session, user_uuid)
     print(user)
     return render_template("user/index.html", user=user, **default_render_params)
 
 
+
+
+
+
 def main():
     app.run(port=os.getenv("PORT", 5000))
+
+
