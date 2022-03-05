@@ -75,3 +75,14 @@ def get_info(user_uuid):
         "last_seen": user.last_seen,
         "last_checked_events": user.last_checked_events,
     }
+
+
+@app.route("/api/v1/users/<friend_id>/friend_status")
+def friend_status(friend_id):
+    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    return {
+        "friends": run_transaction(
+            sessionmaker(bind=engine),
+            lambda session: utility_funcs.check_friend(session, user_uuid, friend_id),
+        )
+    }

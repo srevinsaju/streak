@@ -199,3 +199,23 @@ def register():
         ),
     )
     return "OK"
+
+
+@app.route("/api/v1/users/<friend_id>/add")
+def add_friend(friend_id):
+    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.add_friend(session, user_uuid, friend_id),
+    )
+    return "OK"
+
+
+@app.route("/api/v1/users/<friend_id>/remove")
+def remove_friend(friend_id):
+    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.remove_friend(session, user_uuid, friend_id),
+    )
+    return "OK"

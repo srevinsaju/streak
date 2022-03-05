@@ -57,3 +57,11 @@ class TaskStreak(Base):
     timestamp = Column(DateTime)
     # has the task for the time period completed?
     completed = Column(Boolean)
+
+
+class Friends(Base):
+    """A one to one friend uuid mapping table"""
+
+    __tablename__ = "friend"
+    friend_col1 = Column(UUID(as_uuid=True))
+    friend_col2 = Column(UUID(as_uuid=True))
