@@ -91,6 +91,6 @@ def user_id_view(username: str):
 
 
 def main():
-    app.run(port=os.getenv("PORT", 5000))
+    app.run(port=os.getenv("PORT", 5000), host="0.0.0.0")
 
 
