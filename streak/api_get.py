@@ -61,13 +61,8 @@ def get_completed(task_uuid):
     return {"completed": is_completed}
 
 
-@app.route("/api/v1/users/<user_id>")
-@login_required
-def get_info(user_uuid):
-    user = run_transaction(
-        sessionmaker(bind=engine),
-        lambda session: utility_funcs.get_user(session, user_uuid),
-    )
+def _get_info_fmt(session, user_uuid):
+    user = utility_funcs.get_user(session, user_uuid)
     return {
         "id": str(user.user_id),
         "username": user.username,
@@ -76,8 +71,24 @@ def get_info(user_uuid):
         "last_checked_events": user.last_checked_events,
     }
 
+@app.route("/api/v1/users/<user_id>")
+@login_required
+def get_info(user_uuid):
+    return run_transaction(
+        sessionmaker(bind=engine), 
+        lambda session: _get_info_fmt(session, user_uuid))
+
+@app.route("/api/v1/self")
+@login_required
+def get_self_info():
+    user_uuid = request.environ["user_id"]
+    return run_transaction(
+        sessionmaker(bind=engine), 
+        lambda session: _get_info_fmt(session, user_uuid))
+
 
 @app.route("/api/v1/users/<friend_id>/friend_status")
+@login_required
 def friend_status(friend_id):
     user_uuid = request.environ["user_id"]
     return {

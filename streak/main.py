@@ -24,7 +24,6 @@ def login_view():
 
 
 @app.route("/register")
-@login_required
 def register_view():
     return render_template("register/index.html", **default_render_params)
 
