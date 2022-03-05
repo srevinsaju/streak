@@ -6,7 +6,7 @@ import datetime
 import uuid
 from datetime import timedelta
 from sqlalchemy import create_engine
-from .models import Tasks, TaskStreak, Users
+from .models import Friends, Tasks, TaskStreak, Users
 from . import models
 
 # The code below inserts new accounts.
@@ -152,6 +152,70 @@ def get_user(session, user_uuid) -> Users:
 def validate_user_login(session, username, password):
     user = session.query(Users).filter(Users.username == username).first()
     return (Users.check_password(user.password, password), user)
+
+
+# returns UUID of all the friends
+def get_friends(session, user_uuid):
+    friends = []
+    data = (
+        session.query(Friends)
+        .filter((Friends.friend_col1 == user_uuid) | (Friends.friend_col2 == user_uuid))
+        .all()
+    )
+    for i, j in data:
+        if i != user_uuid:
+            friends.append(i)
+        else:
+            friends.append(j)
+    return friends
+
+
+# add friend
+def add_friend(session, user_uuid, friend_uuid):
+    if check_friend(session, user_uuid, friend_uuid):
+        raise ValueError("Already friends")
+    data = models.Friends(friend_col1=user_uuid, friend_col2=friend_uuid)
+    session.add_all([data])
+
+
+def remove_friend(session, user_uuid, friend_uuid):
+    friend = (
+        session.query(Friends)
+        .filter(
+            (Friends.friend_col1 == user_uuid) & (Friends.friend_col2 == friend_uuid)
+        )
+        .first()
+    ) or (
+        session.query(Friends)
+        .filter(
+            (Friends.friend_col1 == friend_uuid) & (Friends.friend_col2 == user_uuid)
+        )
+        .first()
+    )
+    if not friend:
+        raise ValueError("Friend doesn't exist")
+    session.delete(friend)
+
+
+def check_friend(session, user_uuid, friend_uuid):
+    return bool(
+        (
+            session.query(Friends)
+            .filter(
+                (Friends.friend_col1 == user_uuid)
+                & (Friends.friend_col2 == friend_uuid)
+            )
+            .first()
+        )
+        or (
+            session.query(Friends)
+            .filter(
+                (Friends.friend_col1 == friend_uuid)
+                & (Friends.friend_col2 == user_uuid)
+            )
+            .first()
+        )
+    )
 
 
 def parse_cmdline():
