@@ -55,10 +55,6 @@ def create():
     name = dct.get("name")
     description = dct.get("description")
     schedule = dct.get("schedule")
-
-    if not description or not schedule:
-        raise ValueError("Invalid task payload")
-
     
     task_uuid = uuid.uuid4()
     user_uuid = request.environ["user_id"]
@@ -67,10 +63,10 @@ def create():
         lambda session: utility_funcs.create_task(
             session=session, 
             task_uuid=task_uuid,
-            user_uuid=user_uuid, 
-            description=description, 
+            user_id=user_uuid, 
+            task_description=description, 
             schedule=schedule, 
-            name=name
+            task_name=name
         ),
     )
     return {"task": {"id": str(task_uuid)}}
@@ -118,8 +114,8 @@ def set_completed(task_uuid):
         sessionmaker(bind=engine),
         lambda session: utility_funcs.create_streak(
             session=session, 
-            task_uuid=task_uuid, 
-            user_uuid=user_uuid),
+            task_id=task_uuid, 
+            user_id=user_uuid),
     )
     return "OK"
 
@@ -134,8 +130,8 @@ def reset_streak(task_uuid):
         sessionmaker(bind=engine),
         lambda session: utility_funcs.delete_streak(
             session=session, 
-            task_uuid=task_uuid, 
-            user_uuid=user_uuid),
+            task_id=task_uuid, 
+            user_id=user_uuid),
     )
     return "OK"
 
@@ -203,17 +199,20 @@ def register():
     return "OK"
 
 
-@app.route("/api/v1/users/<friend_id>/add")
+@app.route("/api/v1/users/<friend_id>/add", methods=["POST"])
+@login_required
 def add_friend(friend_id):
     user_uuid = request.environ["user_id"]
+    if friend_id == user_uuid:
+        return make_response("Cannot make friends with yourself", 403)
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.add_friend(session, user_uuid, friend_id),
     )
     return "OK"
 
-
-@app.route("/api/v1/users/<friend_id>/remove")
+@app.route("/api/v1/users/<friend_id>/remove", methods=["POST"])
+@login_required
 def remove_friend(friend_id):
     user_uuid = request.environ["user_id"]
     run_transaction(

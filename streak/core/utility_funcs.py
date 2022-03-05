@@ -186,7 +186,7 @@ def get_friends(session, user_uuid):
 def add_friend(session, user_uuid, friend_uuid):
     if check_friend(session, user_uuid, friend_uuid):
         raise ValueError("Already friends")
-    data = models.Friends(friend_col1=user_uuid, friend_col2=friend_uuid)
+    data = models.Friends(friend_col1=user_uuid, friend_col2=friend_uuid, relation_id=uuid.uuid4())
     session.add_all([data])
 
 

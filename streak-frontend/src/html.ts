@@ -3,6 +3,7 @@ import { login, register, isLoggedIn } from './auth'
 import { parseUserId } from './utils'
 import { AddFriend, CreateNewTask, GetFriendStatus, GetSelfInfo, GetTaskCompletionStatus, GetTasksList, ResetTaskCompletion, SetTaskCompleted, Unfriend, UpdateTask } from "./api"
 import { ListenEventChanges } from './ws'
+import { AxiosError } from 'axios';
 
 
 function registerHtmlCallback() {
@@ -93,12 +94,15 @@ function tasksUpdateCompleteStatus() {
 }
 
 function refreshFriendStatus (addFriendButton: HTMLElement, friends: boolean) {
+    let label = document.getElementById("streak__button-new_task_create-label")
     if (!friends) {
         addFriendButton.classList.add('is-primary')
         addFriendButton.classList.remove('is-error')
+        label.textContent = "Add Friend"
     } else {
         addFriendButton.classList.remove('is-primary')
         addFriendButton.classList.add('is-error')
+        label.textContent = "Remove Friend"
     }
     addFriendButton.classList.remove('is-loading')
 
@@ -120,14 +124,26 @@ function onUserPageLoadCallback() {
             } else {
                 Unfriend(addFriendButton.dataset.userId, function() {
                     refreshFriendStatus(addFriendButton, false)
-                }, function() {
+                }, function(err: Error) {
+                    console.log(err)
                     alert("Couldn't add friend")
                     addFriendButton.classList.remove('is-loading')
                 })
             }
         }
 
-    }, function () {
+    }, function (err: AxiosError) {
+        if (err.response.status == 403) {
+            console.log("Disabling button to prevent being friends with self, meh")
+            addFriendButton.classList.remove("is-loading")
+            addFriendButton.classList.add("is-primary")
+            
+            addFriendButton.textContent = "Dashboard"
+            addFriendButton.addEventListener('click', function() {
+                window.location.replace("/")
+            })
+            return
+        }
         alert("Failed fetching friend status")
     })
 
