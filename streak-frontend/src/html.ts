@@ -1,7 +1,7 @@
 
 import { login, register, isLoggedIn } from './auth'
 import { parseUserId } from './utils'
-import { AddFriend, CreateNewTask, GetFriendStatus, GetSelfInfo, GetTaskCompletionStatus, GetTasksList, ResetTaskCompletion, SetTaskCompleted, Unfriend, UpdateTask } from "./api"
+import { AddFriend, CreateNewTask, GetFriendStatus, GetMaxTaskStreakStatus, GetSelfInfo, GetTaskCompletionStatus, GetTasksList, GetTaskStreakStatus, ResetTaskCompletion, SetTaskCompleted, Unfriend, UpdateTask } from "./api"
 import { ListenEventChanges } from './ws'
 import { AxiosError } from 'axios';
 
@@ -147,6 +147,8 @@ function onUserPageLoadCallback() {
         alert("Failed fetching friend status")
     })
 
+    
+
 
 }
 
@@ -225,9 +227,43 @@ function onDefaultPageLoadCallback() {
 }
 
 
+function taskDetailsCallback() {
+    let taskEditButton = document.getElementById('streak__button-new_task_create')
+    let currentStreak = document.getElementById('streak__title-current_streak')
+    let current2Streak = document.getElementById('streak__title-current_streak_current')
+    let monthlyStreak = document.getElementById('streak__title-current_streak_monthly')
+    let yearlyStreak = document.getElementById('streak__title-current_streak_yearly')
+    let alltimeStreak = document.getElementById('streak__title-current_streak_alltime')
+    let currentStreakDescription = document.getElementById('streak__title-current_streak-description')
+    GetTaskStreakStatus(taskEditButton.dataset.taskId, function(resp: { streak: number; }) {
+        currentStreak.textContent = `${resp.streak}`
+        current2Streak.textContent = `${resp.streak}`
+        if (resp.streak == 1) {
+            currentStreakDescription.textContent = "day on streak"
+        } else {
+            currentStreakDescription.textContent = "days on streak"
+        }
+    }, function () {
+        console.log("Failed to get streak status")
+        currentStreak.textContent = `${0}`
+        currentStreakDescription.textContent = "days on streak"
+    })
+    GetMaxTaskStreakStatus(taskEditButton.dataset.taskId, function(resp: { month: number; year: number; all_time: number; }) {
+        monthlyStreak.textContent = `${resp.month}`
+        yearlyStreak.textContent = `${resp.year}`
+        alltimeStreak.textContent = `${resp.all_time}`
+    }, function () {
+        console.log("Failed to get streak status")
+        monthlyStreak.textContent = `${0}`
+        yearlyStreak.textContent = `${0}`
+        alltimeStreak.textContent = `${0}`
+    })
+}
+
+
 function onDefaultPageUpdateStatus() {
     let date = new Date();
-    let hrs =date.getHours();
+    let hrs = date.getHours();
     let greet = "Good day!";
     if (hrs < 12)
         greet = 'Good Morning';
@@ -265,6 +301,7 @@ export function registerAllCallbacks() {
             break;
         case  /\/task\/.*/.test(window.location.pathname):
             onDefaultPageLoadCallback()
+            taskDetailsCallback()
             navBarSetup()
             break;
         case /\/\@.*/.test(window.location.pathname):

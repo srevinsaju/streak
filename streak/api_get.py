@@ -60,6 +60,19 @@ def get_completed(task_uuid):
     return {"completed": is_completed}
 
 
+@app.route("/api/v1/task/<task_uuid>/current-streak")
+@login_required
+def get_current_streak(task_uuid):
+    user_uuid = request.environ["user_id"]
+    streak = run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.task_streak_status(
+            session, task_id=task_uuid, user_id=user_uuid
+        ),
+    )
+    return {"streak": streak}
+
+
 def _get_info_fmt(session, user_uuid):
     user = utility_funcs.get_user(session, user_uuid)
     return {
@@ -111,7 +124,11 @@ def max_streak():
         sessionmaker(bind=engine),
         lambda session: utility_funcs.get_max_streak(session, user_uuid),
     )
-    return {"all time": all, "month": month, "year": year}
+    all = 0 if len(all) == 0 else all[0]
+    month = 0 if len(month) == 0 else month[0]
+    year = 0 if len(year) == 0 else year[0]
+
+    return {"all_time": all, "month": month, "year": year}
 
 
 @app.route("/api/v1/task/<task_id>/maximum")
@@ -122,4 +139,8 @@ def max_streak_task(task_id):
         sessionmaker(bind=engine),
         lambda session: utility_funcs.get_max_streak_task(session, user_uuid, task_id),
     )
-    return {"all time": all, "month": month, "year": year}
+    all = 0 if len(all) == 0 else all[0]
+    month = 0 if len(month) == 0 else month[0]
+    year = 0 if len(year) == 0 else year[0]
+
+    return {"all_time": all, "month": month, "year": year}

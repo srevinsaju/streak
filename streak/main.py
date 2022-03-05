@@ -45,7 +45,7 @@ def task_view(task_uuid: str):
     with sessionmaker(engine)() as session:
         task = utility_funcs.get_task(session, user_uuid, task_uuid)
     print(task)
-    return render_template("task/index.html", task=task, **default_render_params)
+    return render_template("task/index.html", task=task, **default_render_params, tasks_page=True)
 
 @app.route("/user/<user_uuid>")
 def user_view(user_uuid: str):
@@ -74,6 +74,12 @@ def user_id_view(username: str):
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user_by_name(session, username)
     print(user)
+    
+    with sessionmaker(engine)() as session:
+        all, month, year = utility_funcs.get_max_streak(session, user.user_id)
+    total = all + month + year
+    
+    print(all, month, year)
     if user is None:
         return "User not found", 404
     return render_template("user/index.html", user=user, **default_render_params)

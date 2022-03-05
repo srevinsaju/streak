@@ -35,25 +35,17 @@
         </span>
     </button>
     <br>
-    <button id="streak__button-new_task_create" data-task-id="{{ task.task_id }}" class="button is-primary is-light mt-5">
-      <span class="icon">
-          <i class="fa fa-edit"></i>
-      </span>
-      <span>
-          Edit Task
-      </span>
-  </button>
+    
   </div>
 
 
   <div class="container mt-4">
-    <h1 class="title">
-        39 days
+    <h1 class="title" id="streak__title-current_streak">
+        Loading...
     </h1>
-    <h2 class="subtitle">
-        streak
+    <h2 class="subtitle" id="streak__title-current_streak-description">
+        Fetching streak data.
     </h2>
-    <p>Alltime highest is {{ task.streak_count }}</p>
     
   </div>
 
@@ -62,4 +54,35 @@
   {% endwith %}
 </section>
 
+<section class="section">
+
+  <div class="pricing-table">
+
+
+    <div class="pricing-plan is-warning">
+      <div class="plan-header">Monthly</div>
+      <div class="plan-price"><span id="streak__title-current_streak_monthly" class="plan-price-amount">...</span></div>
+
+    </div>
+
+    <div class="pricing-plan is-active">
+      <div class="plan-header">Current</div>
+      <div class="plan-price"><span id="streak__title-current_streak_current" class="plan-price-amount">...</span></div>
+
+    </div>
+
+    <div class="pricing-plan">
+      <div class="plan-header">Yearly</div>
+      <div class="plan-price"><span id="streak__title-current_streak_yearly" class="plan-price-amount">...</span></div>
+
+    </div>
+
+    <div class="pricing-plan is-danger">
+      <div class="plan-header">All time</div>
+      <div class="plan-price"><span id="streak__title-current_streak_alltime" class="plan-price-amount">...</span></div>
+      
+    </div>
+  </div>
+
+</section>
 {% endblock %}

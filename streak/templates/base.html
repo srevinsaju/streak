@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="{{ static_url }}/css/bulma.min.css">
   <link rel="stylesheet" href="{{ static_url }}/css/common.css">
 
+  {% if tasks_page %}
+  <link rel="stylesheet" href="https://unpkg.com/bulma-pricingtable@0.2.0/dist/css/bulma-pricingtable.min.css">
+  {% endif %}
   <meta property="og:title" content="Streak" />
   <script src="https://kit.fontawesome.com/519c04957a.js" crossorigin="anonymous"></script>
   <title>{{ app_name }}</title>
