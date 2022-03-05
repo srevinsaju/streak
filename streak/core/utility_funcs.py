@@ -257,8 +257,8 @@ def check_friend(session, user_uuid, friend_uuid):
 
 
 def get_max_streak(session, user_uuid):
-    all_time = session.query(func.max(TaskStreak.streak).first()
-        ).filter(TaskStreak.user_id == user_uuid)
+    all_time = session.query(func.max(TaskStreak.streak)
+        ).filter(TaskStreak.user_id == user_uuid).first()
     month = session.query(func.max(TaskStreak.streak)
         ).filter(TaskStreak.user_id == user_uuid
         ).filter(extract('month', TaskStreak.timestamp) == datetime.date.today().month).first()
@@ -266,7 +266,9 @@ def get_max_streak(session, user_uuid):
     year = session.query(func.max(TaskStreak.streak)
         ).filter(TaskStreak.user_id == user_uuid
         ).filter(extract('year', TaskStreak.timestamp) == datetime.date.today().year).first()
-    
+    all_time = 0 if len(all_time) == 0 else all_time[0]
+    month = 0 if len(month) == 0 else month[0]
+    year = 0 if len(year) == 0 else year[0]
     return all_time, month, year
 
 
@@ -283,6 +285,9 @@ def get_max_streak_task(session, user_uuid, task_uuid):
         ).filter(TaskStreak.user_id == user_uuid
         ).filter(TaskStreak.task_id == task_uuid
         ).filter(extract('year', TaskStreak.timestamp) == datetime.date.today().year).first()
+    all_time = 0 if len(all_time) == 0 else all_time[0]
+    month = 0 if len(month) == 0 else month[0]
+    year = 0 if len(year) == 0 else year[0]
     return all_time, month, year
 
 

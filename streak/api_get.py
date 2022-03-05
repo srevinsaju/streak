@@ -124,9 +124,7 @@ def max_streak():
         sessionmaker(bind=engine),
         lambda session: utility_funcs.get_max_streak(session, user_uuid),
     )
-    all = 0 if len(all) == 0 else all[0]
-    month = 0 if len(month) == 0 else month[0]
-    year = 0 if len(year) == 0 else year[0]
+
 
     return {"all_time": all, "month": month, "year": year}
 
@@ -139,8 +137,6 @@ def max_streak_task(task_id):
         sessionmaker(bind=engine),
         lambda session: utility_funcs.get_max_streak_task(session, user_uuid, task_id),
     )
-    all = 0 if len(all) == 0 else all[0]
-    month = 0 if len(month) == 0 else month[0]
-    year = 0 if len(year) == 0 else year[0]
+    
 
     return {"all_time": all, "month": month, "year": year}

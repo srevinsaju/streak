@@ -3,7 +3,7 @@ from . import api_post
 from . import api_get
 import uuid
 from .api_post import engine
-from flask import Flask, render_template, request
+from flask import Flask, redirect, render_template, request
 from . import app
 from sqlalchemy.orm import sessionmaker
 
@@ -59,14 +59,9 @@ def user_view(user_uuid: str):
 @app.route("/@me")
 @login_required
 def profile_view():
-    user_uuid = request.environ["user_id"]
     with sessionmaker(engine)() as session:
-        user = utility_funcs.get_user(session, user_uuid=user_uuid)
-    print(user)
-    if user is None:
-        # this should never happen
-        raise EnvironmentError
-    return render_template("user/index.html", user=user, **default_render_params)
+        user = utility_funcs.get_user(session, request.environ["user_id"])
+    return redirect("/@{}".format(user.username))
 
 
 @app.route("/@<username>")
@@ -76,13 +71,22 @@ def user_id_view(username: str):
     print(user)
     
     with sessionmaker(engine)() as session:
-        all, month, year = utility_funcs.get_max_streak(session, user.user_id)
-    total = all + month + year
+        all_time, month, year = utility_funcs.get_max_streak(session, user.user_id)
+    total = all_time + month + year
+    if total == 0: total = 1
     
-    print(all, month, year)
+    print(all_time, month, year)
     if user is None:
         return "User not found", 404
-    return render_template("user/index.html", user=user, **default_render_params)
+    return render_template("user/index.html", 
+        user=user, 
+        all_time=all_time,
+        month=month,
+        year=year,
+        monthly_percentage=(month / total) * 100,
+        yearly_percentage=(year / total) * 100,
+        alltime_percentage=(all_time / total) * 100,
+        **default_render_params)
 
 
 
