@@ -63,5 +63,6 @@ class Friends(Base):
     """A one to one friend uuid mapping table"""
 
     __tablename__ = "friend"
+    relation_id = Column(UUID(as_uuid=True), primary_key=True)
     friend_col1 = Column(UUID(as_uuid=True))
     friend_col2 = Column(UUID(as_uuid=True))
