@@ -181,6 +181,8 @@ def register():
     
     if not re.match(r"^[a-zA-Z0-9_]+$", dct["username"]):
         raise ValueError("Invalid username")
+    if len(dct["username"]) < 3:
+        raise ValueError("Invalid username")
 
     if run_transaction(
         sessionmaker(bind=engine),
@@ -203,7 +205,7 @@ def register():
 
 @app.route("/api/v1/users/<friend_id>/add")
 def add_friend(friend_id):
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = request.environ["user_id"]
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.add_friend(session, user_uuid, friend_id),
@@ -213,7 +215,7 @@ def add_friend(friend_id):
 
 @app.route("/api/v1/users/<friend_id>/remove")
 def remove_friend(friend_id):
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = request.environ["user_id"]
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.remove_friend(session, user_uuid, friend_id),

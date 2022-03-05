@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 from . import app
 from .api_post import engine, login
 from .core import utility_funcs
@@ -11,7 +11,7 @@ from .api_post import login_required
 @app.route("/api/v1/tasks/list")
 @login_required
 def list():
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = request.environ["user_id"]
     d = []
     tasks = run_transaction(
         sessionmaker(bind=engine),
@@ -34,7 +34,7 @@ def list():
 @app.route("/api/v1/task/<task_uuid>")
 @login_required
 def meta(task_uuid):
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = request.environ["user_id"]
     Session = sessionmaker(bind=engine)
     with Session() as session:
         task = utility_funcs.get_task(session, user_uuid, task_uuid)
@@ -51,7 +51,7 @@ def meta(task_uuid):
 @app.route("/api/v1/task/<task_uuid>/completed")
 @login_required
 def get_completed(task_uuid):
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = request.environ["user_id"]
     is_completed = run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.has_task_completed(
@@ -79,7 +79,7 @@ def get_info(user_uuid):
 
 @app.route("/api/v1/users/<friend_id>/friend_status")
 def friend_status(friend_id):
-    user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
+    user_uuid = request.environ["user_id"]
     return {
         "friends": run_transaction(
             sessionmaker(bind=engine),

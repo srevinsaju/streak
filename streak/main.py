@@ -40,6 +40,7 @@ def index():
 
 
 @app.route("/task/<task_uuid>")
+@login_required
 def task_view(task_uuid: str):
     user_uuid = request.environ["user_id"]
     with sessionmaker(engine)() as session:
@@ -53,6 +54,19 @@ def user_view(user_uuid: str):
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user(session, user_uuid)
     print(user)
+    return render_template("user/index.html", user=user, **default_render_params)
+
+
+@app.route("/@me")
+@login_required
+def profile_view(username: str):
+    user_uuid = request.environ["user_id"]
+    with sessionmaker(engine)() as session:
+        user = utility_funcs.get_user(session, user_uuid=user_uuid)
+    print(user)
+    if user is None:
+        # this should never happen
+        raise EnvironmentError
     return render_template("user/index.html", user=user, **default_render_params)
 
 
