@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, make_response, request
 from . import app
 from .api_post import engine, login
 from .core import utility_funcs
@@ -91,6 +91,9 @@ def get_self_info():
 @login_required
 def friend_status(friend_id):
     user_uuid = request.environ["user_id"]
+    print(friend_id, user_uuid, friend_id == str(user_uuid))
+    if friend_id == str(user_uuid):
+        return make_response("Cannot make friends with yourself", 403)
     return {
         "friends": run_transaction(
             sessionmaker(bind=engine),
