@@ -69,7 +69,7 @@ def get_info(user_uuid):
         lambda session: utility_funcs.get_user(session, user_uuid),
     )
     return {
-        "id": str(user.user_uuid),
+        "id": str(user.user_id),
         "username": user.username,
         "name": user.name,
         "last_seen": user.last_seen,

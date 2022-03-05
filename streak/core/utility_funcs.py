@@ -7,6 +7,8 @@ import uuid
 from datetime import timedelta
 import jwt
 from sqlalchemy import create_engine
+
+from ..exceptions import AuthenticationError
 from .models import Tasks, TaskStreak, Users
 from . import models
 
@@ -29,7 +31,7 @@ def create_account(session, user_uuid, username, name, password):
     session.add_all([account])
 
 
-def create_task(session, task_uuid, task_name, task_description, schedule, user_id):
+def create_task(session, task_uuid: uuid.UUID, task_name: str, task_description: str, schedule, user_id: uuid.UUID):
     task = models.Tasks(
         task_id=task_uuid,
         user_id=user_id,
@@ -41,7 +43,7 @@ def create_task(session, task_uuid, task_name, task_description, schedule, user_
     session.add_all([task])
 
 
-def create_streak(session, task_id, user_id):
+def create_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
 
     task = (
         session.query(TaskStreak)
@@ -87,7 +89,7 @@ def create_streak(session, task_id, user_id):
     session.add_all([streak])
 
 
-def delete_streak(session, task_id, user_id):
+def delete_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
     task = (
         session.query(TaskStreak)
         .filter(TaskStreak.task_id == task_id)
@@ -103,7 +105,7 @@ def delete_streak(session, task_id, user_id):
     session.delete(task)
 
 
-def has_task_completed(session, task_id, user_id):
+def has_task_completed(session, task_id: uuid.UUID, user_id: uuid.UUID) -> bool:
     task = (
         session.query(TaskStreak)
         .filter(TaskStreak.task_id == task_id)
@@ -145,19 +147,22 @@ def get_task(session, user_uuid, task_uuid) -> Tasks:
         .first()
     )
 
-def get_user_from_jwt_token(session, jwt_token: str):
+def get_userid_from_jwt_token(session, jwt_token: str) -> uuid.UUID:
     payload = jwt.decode(jwt_token, os.getenv("SECRET_KEY"), algorithms=["HS256"])
-    return get_user(session, payload["user_id"])
+    return get_user(session, payload["user_id"]).user_id
 
 
-def get_user(session, user_uuid) -> Users:
-    return session.query(Users).filter(Tasks.user_id == user_uuid).first()
+def get_user(session, user_uuid: uuid.UUID) -> Users:
+    return session.query(Users).filter(Users.user_id == user_uuid).first()
+
+def get_user_by_name(session, username: str) -> Users:
+    return session.query(Users).filter(Users.username == username).first()
 
 
-def validate_user_login(session, name, password):
-    user = session.query(Users).filter(Users.name == name).first()
+def validate_user_login(session, username, password):
+    user = session.query(Users).filter(Users.username == username).first()
     if not user:
-        raise ValueError("User does not exist")
+        raise AuthenticationError("User does not exist")
     
     return (Users.check_password(user, password), user.user_id)
 

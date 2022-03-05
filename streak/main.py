@@ -32,7 +32,7 @@ def register_view():
 @app.route("/")
 @login_required
 def index():
-    user_uuid = uuid.UUID(request.environ["user_id"])
+    user_uuid = request.environ["user_id"]
     with sessionmaker(engine)() as session:
         tasks = utility_funcs.get_tasks(session, user_uuid)
     print(tasks)
@@ -41,7 +41,7 @@ def index():
 
 @app.route("/task/<task_uuid>")
 def task_view(task_uuid: str):
-    user_uuid = uuid.UUID(request.environ["user_id"])
+    user_uuid = request.environ["user_id"]
     with sessionmaker(engine)() as session:
         task = utility_funcs.get_task(session, user_uuid, task_uuid)
     print(task)
@@ -49,13 +49,21 @@ def task_view(task_uuid: str):
 
 @app.route("/user/<user_uuid>")
 def user_view(user_uuid: str):
-    user_uuid = uuid.UUID(request.environ["user_id"])
+    user_uuid = uuid.UUID(user_uuid)
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user(session, user_uuid)
     print(user)
     return render_template("user/index.html", user=user, **default_render_params)
 
 
+@app.route("/@<username>")
+def user_id_view(username: str):
+    with sessionmaker(engine)() as session:
+        user = utility_funcs.get_user_by_name(session, username)
+    print(user)
+    if user is None:
+        return "User not found", 404
+    return render_template("user/index.html", user=user, **default_render_params)
 
 
 

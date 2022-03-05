@@ -6,6 +6,9 @@ import { ListenEventChanges } from './ws'
 
 
 function registerHtmlCallback() {
+    let registerButton = (<HTMLButtonElement>document.getElementById('submitButton'));
+    registerButton.classList.add('is-loading');
+    let name = (<HTMLInputElement>document.getElementById('full_name')).value
     let username = (<HTMLInputElement>document.getElementById('userId')).value
     let password = (<HTMLInputElement>document.getElementById('password')).value
     let confirmedPassword = (<HTMLInputElement>document.getElementById('confirm_password')).value
@@ -14,11 +17,12 @@ function registerHtmlCallback() {
         return
     }
 
-    register(username, password, function() {
+    register(username, password, name, function() {
         window.location.replace("/login");
     }, 
     function() {
         alert('Registration failed')
+        registerButton.classList.remove('is-loading');
     })   
 }
 
@@ -26,12 +30,11 @@ function registerHtmlCallback() {
 function loginHtmlCallback() {
     let userId = (<HTMLInputElement>document.getElementById('userId')).value
     let password = (<HTMLInputElement>document.getElementById('password')).value
-    let parsed = parseUserId(userId)
-    login(parsed.username, password, function() {
+    login(userId, password, function() {
         const urlParams = new URLSearchParams(window.location.search);
-        const next = urlParams.get('next');
+        const next: string = urlParams.get('next');
         let nextUrl = "/"
-        if (next != null && next != "") {
+        if (next != null && next != "" && next != "undefined" && next != null) {
             nextUrl = decodeURI(next)
         }
         window.location.replace(next);
@@ -175,10 +178,10 @@ function navBarSetup() {
 
 export function registerAllCallbacks() {
     switch (true) {
-        case /\/register\//.test(window.location.pathname):
+        case /\/register.*/.test(window.location.pathname):
             registerRegisterButtonCallback()
             break; 
-        case  /\/login\//.test(window.location.pathname):
+        case  /\/login.*/.test(window.location.pathname):
             registerLoginButtonCallback()
             break;
         case  /\/task\/.*/.test(window.location.pathname):

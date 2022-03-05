@@ -4,16 +4,7 @@ const axios = require('axios').default;
 
 
 export function isLoggedIn(): boolean {
-    let lKeys = ["token", "username", "hostname"] 
-    for (const key in lKeys) {
-        if (localStorage.getItem(lKeys[key]) === null) {
-            return false;
-        }
-        // TODO, what if the person's name is null?
-        if (localStorage.getItem(lKeys[key]) === "null") {
-            return false;
-        }
-    }
+    // TODO: change hardcoded logged in status
     return true;
 }
 
@@ -42,6 +33,7 @@ export function login(
 export function register(
     username: string, 
     password: string, 
+    name: string,
     success: Function, 
     error: Function)
 {
@@ -49,6 +41,7 @@ export function register(
     {
         "username": username, 
         "password": password,
+        "name": name,
     }).then((res: { data: { token: string; }; }) => {
         success()
     }).catch((err: any) => {
