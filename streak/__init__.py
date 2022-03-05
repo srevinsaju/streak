@@ -6,5 +6,8 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 
 print("Loading environment variables")
-load_dotenv()
+if os.getenv("DOTENV_LOAD_PATH") is not None:
+    load_dotenv(os.getenv("DOTENV_LOAD_PATH"))
+else:
+    load_dotenv()
 
