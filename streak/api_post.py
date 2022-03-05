@@ -6,7 +6,6 @@ import re
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from flask import make_response, request
 from sqlalchemy_cockroachdb import run_transaction
 
 from streak.exceptions import AuthenticationError
@@ -14,28 +13,33 @@ from . import app
 from .core import utility_funcs
 from .core.dbinit import create_tables
 from functools import wraps
-from flask import g, request, redirect, url_for
-from sqlalchemy_cockroachdb import run_transaction
+from flask import make_response, request, redirect, url_for
+
 
 db_uri = "placeholder"
+
 
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-       
-        not_authorized = redirect(url_for('login_view', next=request.url))
+
+        not_authorized = redirect(url_for("login_view", next=request.url))
         if not request.cookies.get("token"):
             print("No token", request.cookies)
             return not_authorized
         user_id = run_transaction(
             sessionmaker(bind=engine),
-            lambda session: utility_funcs.get_userid_from_jwt_token(session, request.cookies.get("token")),
+            lambda session: utility_funcs.get_userid_from_jwt_token(
+                session, request.cookies.get("token")
+            ),
         )
         if not user_id:
             return not_authorized
         request.environ["user_id"] = user_id
         return f(*args, **kwargs)
+
     return decorated_function
+
 
 try:
     _psycopg_uri = os.getenv("BACKEND_DSN")
@@ -59,18 +63,17 @@ def create():
     if not description or not schedule:
         raise ValueError("Invalid task payload")
 
-    
     task_uuid = uuid.uuid4()
     user_uuid = request.environ["user_id"]
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.create_task(
-            session=session, 
+            session=session,
             task_uuid=task_uuid,
-            user_uuid=user_uuid, 
-            description=description, 
-            schedule=schedule, 
-            name=name
+            user_uuid=user_uuid,
+            description=description,
+            schedule=schedule,
+            name=name,
         ),
     )
     return {"task": {"id": str(task_uuid)}}
@@ -98,10 +101,10 @@ def update(task_uuid):
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.update_task(
-            session=session, 
+            session=session,
             task_uuid=task_uuid,
             task_name=name,
-            task_description=description, 
+            task_description=description,
             schedule=schedule,
         ),
     )
@@ -117,9 +120,8 @@ def set_completed(task_uuid):
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.create_streak(
-            session=session, 
-            task_uuid=task_uuid, 
-            user_uuid=user_uuid),
+            session=session, task_uuid=task_uuid, user_uuid=user_uuid
+        ),
     )
     return "OK"
 
@@ -133,9 +135,8 @@ def reset_streak(task_uuid):
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.delete_streak(
-            session=session, 
-            task_uuid=task_uuid, 
-            user_uuid=user_uuid),
+            session=session, task_uuid=task_uuid, user_uuid=user_uuid
+        ),
     )
     return "OK"
 
@@ -149,14 +150,12 @@ def login():
     check, user = run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.validate_user_login(
-            session=session, 
-            username=dct["username"], 
-            password=dct["password"]
+            session=session, username=dct["username"], password=dct["password"]
         ),
     )
     if not check:
         raise AuthenticationError("Invalid credentials")
-    
+
     token = jwt.encode(
         {
             "user_id": str(user),
@@ -165,10 +164,7 @@ def login():
         os.getenv("SECRET_KEY"),
         algorithm="HS256",
     )
-    resp = make_response({
-        "user_id": str(user),
-        "token": token
-    })
+    resp = make_response({"user_id": str(user), "token": token})
     resp.set_cookie("token", token)
     return resp
 
@@ -178,7 +174,7 @@ def register():
     dct = request.get_json()
     if not dct.get("username") or not dct.get("password") or not dct.get("name"):
         raise ValueError("Invalid register payload")
-    
+
     if not re.match(r"^[a-zA-Z0-9_]+$", dct["username"]):
         raise ValueError("Invalid username")
     if len(dct["username"]) < 3:
@@ -194,10 +190,11 @@ def register():
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.create_account(
-            session, user_uuid=user_id, 
-            username=dct["username"], 
-            name=dct["name"], 
-            password=dct["password"]
+            session,
+            user_uuid=user_id,
+            username=dct["username"],
+            name=dct["name"],
+            password=dct["password"],
         ),
     )
     return "OK"
