@@ -8,7 +8,7 @@ import { detectSchemeFromHostname, ParseJwt } from "./utils";
 function getClient(): AxiosInstance {
     const token = localStorage.getItem("token");
     // TODO: change hardcoded hostname
-    const hostname = "http://localhost:5000" //localStorage.getItem("hostname");
+    const hostname = "https://streak.srev.in" //localStorage.getItem("hostname");
     if (token == "") { // || hostname == "") {
         // ask the user to login once again
         window.location.replace("/login");
