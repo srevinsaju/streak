@@ -190,7 +190,7 @@ export function GetTaskMetadata(task_id: string, success: Function, error: Funct
 }
 
 export function DeleteTask(task_id: string, success: Function, error: Function) {
-    getClient().get(`/task/${task_id}/delete`).then(response => {
+    getClient().post(`/task/${task_id}/delete`).then(response => {
         success(response.data);
     }).catch(e => { error(e)});
 }

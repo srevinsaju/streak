@@ -81,7 +81,7 @@ def create():
 def delete(task_id):
     run_transaction(
         sessionmaker(bind=engine),
-        lambda session: utility_funcs.delete_task(uuid.UUID(task_id)),
+        lambda session: utility_funcs.delete_task(session, uuid.UUID(task_id)),
     )
     return "OK"
 

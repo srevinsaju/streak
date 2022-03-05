@@ -1,7 +1,7 @@
 
 import { login, register, isLoggedIn } from './auth'
 import { parseUserId } from './utils'
-import { AddFriend, CreateNewTask, GetFriendStatus, GetMaxTaskStreakStatus, GetSelfInfo, GetTaskCompletionStatus, GetTasksList, GetTaskStreakStatus, ResetTaskCompletion, SetTaskCompleted, Unfriend, UpdateTask } from "./api"
+import { AddFriend, CreateNewTask, DeleteTask, GetFriendStatus, GetMaxTaskStreakStatus, GetSelfInfo, GetTaskCompletionStatus, GetTasksList, GetTaskStreakStatus, ResetTaskCompletion, SetTaskCompleted, Unfriend, UpdateTask } from "./api"
 import { ListenEventChanges } from './ws'
 import { AxiosError } from 'axios';
 
@@ -175,6 +175,7 @@ function onDefaultPageLoadCallback() {
     // move schedule to cron, because streaks can be 
     let newTaskModalMetaSchedule = <HTMLInputElement>document.getElementById("streak__modal-new_task_create-schedule");
     let newTaskModalMetaDescription = <HTMLInputElement>document.getElementById("streak__modal-new_task_create-description");
+    let newTaskDeleteButton = document.getElementById('streak__button-new_task_delete');
     newTaskModalCreateButton.addEventListener('click', function () {
         newTaskModalCreateButton.classList.add('is-loading');
         
@@ -222,6 +223,23 @@ function onDefaultPageLoadCallback() {
         
     })
 
+    if (/\/task\/.*/.test(window.location.pathname)) {
+
+        newTaskDeleteButton.addEventListener('click', function() {
+            newTaskModal.classList.add("is-loading")
+            if (confirm("Are you sure you want to delete this task?")) {
+                DeleteTask(newTaskCreateButton.dataset.taskId, function() {
+                    window.location.replace("/")
+                }, function(e: Error) {
+                    alert(`Couldn't delete task. ${e}`)
+
+                })
+
+            }
+            newTaskModal.classList.remove("is-loading")
+            
+        })
+    }
     tasksUpdateCompleteStatus()
 
 }
@@ -236,8 +254,8 @@ function taskDetailsCallback() {
     let alltimeStreak = document.getElementById('streak__title-current_streak_alltime')
     let currentStreakDescription = document.getElementById('streak__title-current_streak-description')
     GetTaskStreakStatus(taskEditButton.dataset.taskId, function(resp: { streak: number; }) {
-        currentStreak.textContent = `${resp.streak}`
-        current2Streak.textContent = `${resp.streak}`
+        currentStreak.textContent = resp.streak != null ? `${resp.streak}`: "0"
+        current2Streak.textContent = resp.streak != null ? `${resp.streak}` : "0"
         if (resp.streak == 1) {
             currentStreakDescription.textContent = "day on streak"
         } else {
@@ -245,18 +263,18 @@ function taskDetailsCallback() {
         }
     }, function () {
         console.log("Failed to get streak status")
-        currentStreak.textContent = `${0}`
+        currentStreak.textContent = "0"
         currentStreakDescription.textContent = "days on streak"
     })
     GetMaxTaskStreakStatus(taskEditButton.dataset.taskId, function(resp: { month: number; year: number; all_time: number; }) {
-        monthlyStreak.textContent = `${resp.month}`
-        yearlyStreak.textContent = `${resp.year}`
-        alltimeStreak.textContent = `${resp.all_time}`
+        monthlyStreak.textContent = resp.month != null ? `${resp.month}` : "0"
+        yearlyStreak.textContent = resp.year != null ? `${resp.year}` : "0"
+        alltimeStreak.textContent = resp.all_time != null ? `${resp.all_time}` : "0"
     }, function () {
         console.log("Failed to get streak status")
-        monthlyStreak.textContent = `${0}`
-        yearlyStreak.textContent = `${0}`
-        alltimeStreak.textContent = `${0}`
+        monthlyStreak.textContent = "0"
+        yearlyStreak.textContent = "0"
+        alltimeStreak.textContent = "0"
     })
 }
 
