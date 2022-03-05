@@ -22,6 +22,31 @@ function getClient(): AxiosInstance {
     });
 }
 
+export function GetFriendStatus(friend_id: string, success: Function, error: Function) {
+    getClient().get(`/users/${friend_id}/friend_status`).then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+export function GetSelfInfo(success: Function, error: Function) {
+    getClient().get(`/self`).then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+export function AddFriend(friend_id: string, success: Function, error: Function) {
+    getClient().post(`/users/${friend_id}/add`, {}).then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+export function Unfriend(friend_id: string, success: Function, error: Function) {
+    getClient().post(`/users/${friend_id}/remove`, {}).then(response => {
+        success(response.data);
+    }).catch(e => { error(e) });
+}
+
+
 // GRT /api/v1/tasks/create
 export function CreateNewTask(name: string, schedule: string, description: string, success: Function, error: Function) {
     if (name == "" || schedule == "") {

@@ -19,9 +19,9 @@
       User has not accessed the profile yet
     {% endif %}
     </h2>
-    <button id="streak__button-new_task_create" data-task-id="{{ user.user_uuid }}" class="button is-primary  mt-5 is-loading">
+    <button id="streak__button-new_task_create" data-user-id="{{ user.user_id }}" class="button is-primary  mt-5 is-loading">
         <span class="icon">
-            <i class="fa fa-user-group"></i>
+            <i class="fa fa-user"></i>
         </span>
         <span>
             Add Friend
