@@ -10,6 +10,7 @@ from sqlalchemy import create_engine
 from ..exceptions import AuthenticationError
 from .models import Friends, Tasks, TaskStreak, Users
 from . import models
+from sqlalchemy import func
 
 # The code below inserts new accounts.
 
@@ -237,6 +238,38 @@ def check_friend(session, user_uuid, friend_uuid):
             .first()
         )
     )
+
+
+def get_max_streak(session, user_uuid):
+    all_time = session.query(func.max(TaskStreak.streak)).filter(
+        TaskStreak.user_id == user_uuid
+    )
+    month = session.query(func.max(TaskStreak.streak)).filter(
+        TaskStreak.user_id
+        == user_uuid & (TaskStreak.timestamp.month() == datetime.today().month())
+    )
+    year = session.query(func.max(TaskStreak.streak)).filter(
+        TaskStreak.user_id
+        == user_uuid & (TaskStreak.timestamp.year() == datetime.today().year())
+    )
+    return all_time, month, year
+
+
+def get_max_streak_task(session, user_uuid, task_uuid):
+    all_time = session.query(func.max(TaskStreak.streak)).filter(
+        (TaskStreak.user_id == user_uuid) & (TaskStreak.task_id == task_uuid)
+    )
+    month = session.query(func.max(TaskStreak.streak)).filter(
+        (TaskStreak.user_id == user_uuid)
+        & (TaskStreak.task_id == task_uuid)
+        & (TaskStreak.timestamp.month() == datetime.today().month())
+    )
+    year = session.query(func.max(TaskStreak.streak)).filter(
+        (TaskStreak.user_id == user_uuid)
+        & (TaskStreak.task_id == task_uuid)
+        & (TaskStreak.timestamp.year() == datetime.today().year())
+    )
+    return all_time, month, year
 
 
 def parse_cmdline():

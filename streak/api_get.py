@@ -3,7 +3,6 @@ from . import app
 from .api_post import engine, login
 from .core import utility_funcs
 from sqlalchemy.orm import sessionmaker
-import uuid
 from sqlalchemy_cockroachdb import run_transaction
 from .api_post import login_required
 
@@ -71,20 +70,22 @@ def _get_info_fmt(session, user_uuid):
         "last_checked_events": user.last_checked_events,
     }
 
+
 @app.route("/api/v1/users/<user_id>")
 @login_required
 def get_info(user_uuid):
     return run_transaction(
-        sessionmaker(bind=engine), 
-        lambda session: _get_info_fmt(session, user_uuid))
+        sessionmaker(bind=engine), lambda session: _get_info_fmt(session, user_uuid)
+    )
+
 
 @app.route("/api/v1/self")
 @login_required
 def get_self_info():
     user_uuid = request.environ["user_id"]
     return run_transaction(
-        sessionmaker(bind=engine), 
-        lambda session: _get_info_fmt(session, user_uuid))
+        sessionmaker(bind=engine), lambda session: _get_info_fmt(session, user_uuid)
+    )
 
 
 @app.route("/api/v1/users/<friend_id>/friend_status")
@@ -97,3 +98,25 @@ def friend_status(friend_id):
             lambda session: utility_funcs.check_friend(session, user_uuid, friend_id),
         )
     }
+
+
+@app.route("/api/v1/streaks/maximum")
+@login_required
+def max_streak():
+    user_uuid = request.environ["user_id"]
+    all, month, year = run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.get_max_streak(session, user_uuid),
+    )
+    return {"all time": all, "month": month, "year": year}
+
+
+@app.route("/api/v1/task/<task_id>/maximum")
+@login_required
+def max_streak_task(task_id):
+    user_uuid = request.environ["user_id"]
+    all, month, year = run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.get_max_streak_task(session, user_uuid, task_id),
+    )
+    return {"all time": all, "month": month, "year": year}
