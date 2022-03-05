@@ -13,10 +13,14 @@ from . import models
 # The code below inserts new accounts.
 
 
-def create_account(session, user_uuid, name, password):
-    """Create new accounts with random account IDs and default field values"""
+def check_account_exists(session, username):
+    return bool(session.query(Users).filter(Users.username == username).first())
+
+
+def create_account(session, user_uuid, username, name, password):
     account = models.Users(
         user_id=user_uuid,
+        username=username,
         name=name,
         password=models.Users.get_hashed_password(password),
         last_seen=datetime.datetime.now(),
@@ -26,7 +30,6 @@ def create_account(session, user_uuid, name, password):
 
 
 def create_task(session, task_uuid, task_name, task_description, schedule, user_id):
-    """Create new accounts with random account IDs and default field values"""
     task = models.Tasks(
         task_id=task_uuid,
         user_id=user_id,

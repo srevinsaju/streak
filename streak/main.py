@@ -59,7 +59,6 @@ def user_view(user_uuid: str):
 
 
 
-
 def main():
     app.run(port=os.getenv("PORT", 5000))
 
