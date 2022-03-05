@@ -34,6 +34,5 @@ def task_view(task_uuid: str):
     return render_template("task/index.html", task=task, **default_render_params)
 
 
-
 def main():
     app.run(port=os.getenv("PORT", 5000))

@@ -65,6 +65,7 @@ def get_info(user_uuid):
     )
     return {
         "id": str(user.user_uuid),
+        "username": user.username,
         "name": user.name,
         "last_seen": user.last_seen,
         "last_checked_events": user.last_checked_events,

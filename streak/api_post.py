@@ -27,10 +27,11 @@ except Exception as e:
 @app.route("/api/v1/tasks/create", methods=["POST"])
 def create():
     dct = request.get_json().get("task")
-    name = dct.get("name")
+    username = dct.get("username")
     description = dct.get("description")
     schedule = dct.get("schedule")
-    if not name or not description or not schedule:
+
+    if not username or not description or not schedule:
         raise ValueError("Invalid task payload")
 
     user_uuid = uuid.UUID("342a8c4a-130a-40b9-a79f-8b784b3b3e24")
@@ -38,7 +39,7 @@ def create():
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.create_task(
-            session, task_uuid, name, description, schedule, user_uuid
+            session, task_uuid, username, description, schedule, user_uuid
         ),
     )
     return {"task": {"id": str(task_uuid)}}
@@ -97,12 +98,12 @@ def reset_streak(task_uuid):
 @app.route("/api/v1/login", methods=["POST"])
 def login():
     dct = request.get_json()
-    if not dct.get("name") or not dct.get("password"):
+    if not dct.get("username") or not dct.get("password"):
         raise ValueError("Invalid task payload")
     check, user = run_transaction(
         sessionmaker(bind=engine),
-        lambda session: utility_funcs.update_task(
-            session, dct["name"], dct["password"]
+        lambda session: utility_funcs.validate_user_login(
+            session, dct["username"], dct["password"]
         ),
     )
     if not check:
@@ -111,7 +112,6 @@ def login():
         return jwt.encode(
             {
                 "user_id": user.user_id,
-                "password": user.password,
                 "time": str(datetime.datetime.now()),
             },
             os.getenv("SECRET_KEY"),
@@ -123,13 +123,20 @@ def login():
 @app.route("/api/v1/register", methods=["POST"])
 def register():
     dct = request.get_json()
-    if not dct.get("name") or not dct.get("password"):
+    if not dct.get("username") or not dct.get("password") or not dct.get("name"):
         raise ValueError("Invalid task payload")
+
+    if run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.check_account_exists(session, dct["username"]),
+    ):
+        raise ValueError("Username already in database")
+
     user_id = uuid.uuid4()
     run_transaction(
         sessionmaker(bind=engine),
         lambda session: utility_funcs.create_account(
-            session, user_id, dct["name"], dct["password"]
+            session, user_id, dct["username"], dct["name"], dct["password"]
         ),
     )
     return "OK"
