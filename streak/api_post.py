@@ -23,7 +23,8 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
 
-        not_authorized = redirect(url_for("login_view", next=request.url))
+        not_authorized = redirect(url_for("login_view", next=request.url, _external=True))
+        
         if not request.cookies.get("token"):
             print("No token", request.cookies)
             return not_authorized
