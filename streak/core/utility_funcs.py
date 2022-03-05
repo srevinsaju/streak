@@ -6,7 +6,7 @@ import datetime
 import uuid
 from datetime import timedelta
 from sqlalchemy import create_engine
-from .models import Tasks, TaskStreak
+from .models import Tasks, TaskStreak, Users
 from . import models
 
 # The code below inserts new accounts.
@@ -107,6 +107,11 @@ def get_tasks(session, user_uuid) -> List[Tasks]:
 
 def get_task(session, user_uuid, task_uuid) -> Tasks:
     return session.query(Tasks).filter(Tasks.user_id == user_uuid).filter(Tasks.task_id == task_uuid).first()
+
+
+def validate_user_login(session, name, password):
+    user = session.query(Users).filter(Users.name == name).first()
+    return (user.password == password, user)
 
 
 def parse_cmdline():

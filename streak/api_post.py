@@ -1,6 +1,7 @@
-import json
+import jwt
 import uuid
 import os
+import datetime
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -94,3 +95,28 @@ def reset_streak(task_uuid):
         ),
     )
     return "OK"
+
+
+@app.route("/api/v1/login")
+def login():
+    dct = request.get_json()
+    if not dct.get("name") or not dct.get("password"):
+        raise ValueError("Invalid task payload")
+    check, user = run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.update_task(
+            session, dct["name"], dct["password"]
+        ),
+    )
+    if not check:
+        raise ValueError("Invalid credentials")
+    if check:
+        return jwt.encode(
+            {
+                "user_id": user.user_id,
+                "password": user.password,
+                "time": str(datetime.datetime.now()),
+            },
+            os.getenv("SECRET_KEY"),
+            algorithm="HS256",
+        )
