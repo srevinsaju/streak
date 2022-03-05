@@ -59,7 +59,7 @@ def user_view(user_uuid: str):
 
 @app.route("/@me")
 @login_required
-def profile_view(username: str):
+def profile_view():
     user_uuid = request.environ["user_id"]
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user(session, user_uuid=user_uuid)
