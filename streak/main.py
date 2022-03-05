@@ -3,7 +3,7 @@ from . import api_post
 from . import api_get
 import uuid
 from .api_post import engine
-from flask import Flask, redirect, render_template, request
+from flask import Flask, abort, make_response, redirect, render_template, request
 from . import app
 from sqlalchemy.orm import sessionmaker
 
@@ -16,6 +16,15 @@ default_render_params = {
     "app_name": "Streak",
     "static_url": os.getenv("STATIC_ENDPOINT"),
 }
+
+@app.errorhandler(404)
+def resource_not_found(e):
+    return render_template("404.html", err=e, **default_render_params), 404
+
+@app.errorhandler(500)
+def resource_not_found(e):
+    return render_template("500.html", err=e, **default_render_params), 404
+
 
 
 @app.route("/login")
@@ -45,6 +54,8 @@ def task_view(task_uuid: str):
     with sessionmaker(engine)() as session:
         task = utility_funcs.get_task(session, user_uuid, task_uuid)
     print(task)
+    if task is None:
+        abort(404, description="Task not found")
     return render_template("task/index.html", task=task, **default_render_params, tasks_page=True)
 
 @app.route("/user/<user_uuid>")
@@ -53,6 +64,8 @@ def user_view(user_uuid: str):
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user(session, user_uuid)
     print(user)
+    if user is None:
+        abort(404, description="User not found")
     return render_template("user/index.html", user=user, **default_render_params)
 
 
@@ -61,6 +74,8 @@ def user_view(user_uuid: str):
 def profile_view():
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user(session, request.environ["user_id"])
+    if user is None:
+        raise EnvironmentError("User self is not found")
     return redirect("/@{}".format(user.username))
 
 
@@ -69,6 +84,8 @@ def user_id_view(username: str):
     with sessionmaker(engine)() as session:
         user = utility_funcs.get_user_by_name(session, username)
     print(user)
+    if user is None:
+        abort(404, description="User not found")
     
     with sessionmaker(engine)() as session:
         all_time, month, year = utility_funcs.get_max_streak(session, user.user_id)

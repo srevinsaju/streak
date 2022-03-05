@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<section class="hero is-link is-fullheight-with-navbar">
+    <div class="hero-body">
+        <div class="container has-text-centered">
+            <p class="title" style="font-size: 6em;">
+            404
+            </p>
+            <p class="subtitle">
+            {{ err }}
+            </p>
+        </div>
+    </div>
+  </section>
+
+{% endblock %}

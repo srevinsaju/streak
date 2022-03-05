@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+
+<section class="hero is-danger is-fullheight-with-navbar">
+    <div class="hero-body">
+        <div class="container has-text-centered">
+            <p class="title" style="font-size: 6em;">
+            500
+            </p>
+            <p class="subtitle">
+                Well, this was unexpected.
+            
+            </p>
+            <p>
+                Looks like we hit a bug. 
+            </p>
+            <br>
+            <p>
+                If you would like to contribute, please 
+                create an issue at our GitHub repository:
+                <br>
+                <a href="https://github.com/srevinsaju/streak">
+                    <span class="icon">
+                        <i class="fa fa-github"></i>
+                    </span>
+                    <span>
+                    srevinsaju/streak
+                    </span> 
+                </a>
+            </p>
+            <p>
+                {{ err }}
+            </p>
+        </div>
+    </div>
+  </section>
+
+{% endblock %}
