@@ -99,7 +99,7 @@ def update(task_uuid):
         sessionmaker(bind=engine),
         lambda session: utility_funcs.update_task(
             session=session,
-            task_uuid=task_uuid,
+            task_id=task_uuid,
             task_name=name,
             task_description=description,
             schedule=schedule,

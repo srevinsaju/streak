@@ -140,3 +140,14 @@ def max_streak_task(task_id):
     
 
     return {"all_time": all, "month": month, "year": year}
+
+
+@app.route("/api/v1/events")
+@login_required
+def get_notifications():
+    user_uuid = request.environ["user_id"]
+    return run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.get_notifications(session, user_uuid),
+    )
+    

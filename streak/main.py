@@ -1,4 +1,6 @@
 import os
+
+from sqlalchemy import inspect
 from . import api_post
 from . import api_get
 import uuid
@@ -45,6 +47,25 @@ def index():
         tasks = utility_funcs.get_tasks(session, user_uuid)
     print(tasks)
     return render_template("index.html", tasks=tasks, **default_render_params)
+
+
+@app.route("/events")
+@login_required
+def events_view():
+    user_uuid = request.environ["user_id"]
+    with sessionmaker(engine)() as session:
+        notifications = utility_funcs.get_notifications(session, user_uuid)
+
+    return render_template(
+        "events/index.html", 
+        **default_render_params,
+        greetings=["Hifive 👏", "Congrats! 🥳"], 
+        notifications=[
+            {"streak": x.Events.streak, 
+            "name": x.Users.username,
+            "task_name": x.Tasks.task_name,
+            } for x in notifications
+        ])
 
 
 @app.route("/task/<task_uuid>")

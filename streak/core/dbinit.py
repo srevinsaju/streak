@@ -2,17 +2,13 @@ import os
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
-from .models import Friends, Users, Tasks, TaskStreak
+from .models import Events, Friends, Users, Tasks, TaskStreak
 
 
 def create_tables(engine: Engine):
     """
     Creates all required tables if they dont exist
     """
-    Users.__table__.create(bind=engine, checkfirst=True)
-    Tasks.__table__.create(bind=engine, checkfirst=True)
-    TaskStreak.__table__.create(bind=engine, checkfirst=True)
-    Friends.__table__.create(bind=engine, checkfirst=True)
 
 
     if os.getenv("DEBUG"):

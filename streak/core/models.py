@@ -67,3 +67,13 @@ class Friends(Base):
     relation_id = Column(UUID(as_uuid=True), primary_key=True)
     friend_col1 = Column(UUID(as_uuid=True))
     friend_col2 = Column(UUID(as_uuid=True))
+
+
+class Events(Base):
+    """Events to be shown to user"""
+    __tablename__ = "events"
+    event_id = Column(UUID(as_uuid=True), primary_key=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"))
+    task_id = Column(UUID(as_uuid=True), ForeignKey("tasks.task_id"))
+    streak = Column(Integer)
+    timestamp = Column(DateTime)

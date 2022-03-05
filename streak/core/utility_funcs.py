@@ -8,7 +8,7 @@ from datetime import timedelta
 import jwt
 from sqlalchemy import create_engine, extract
 from ..exceptions import AuthenticationError
-from .models import Friends, Tasks, TaskStreak, Users
+from .models import Events, Friends, Tasks, TaskStreak, Users
 from . import models
 from sqlalchemy import func
 from .events import event_wrapper
@@ -88,7 +88,7 @@ def create_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
         streak = 1
 
     streak_uuid = uuid.uuid4()
-    streak = models.TaskStreak(
+    streaks = models.TaskStreak(
         streak_id=streak_uuid,
         task_id=task_id,
         user_id=user_id,
@@ -96,8 +96,33 @@ def create_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
         timestamp=datetime.datetime.now(),
         completed=True,
     )
-    session.add_all([streak])
+    session.add_all([streaks])
+    create_event(session, user_id, task_id, streak)
 
+
+def create_event(session, user_id: uuid.UUID, task_id: uuid.UUID, streak_days: int):
+    event = models.Events(
+        event_id=uuid.uuid4(),
+        task_id=task_id,
+        user_id=user_id,
+        streak=streak_days,
+        timestamp=datetime.datetime.now(),
+    )
+    session.add_all([event])
+
+def get_notifications(session, user_id: uuid.UUID) -> List[Tasks]:
+    q = session.query(Events, Friends, TaskStreak, Users, Tasks
+        ).filter(Events.user_id != user_id
+        ).filter(Events.user_id == Friends.friend_col1
+        ).filter(Events.task_id == TaskStreak.task_id
+        ).filter(TaskStreak.completed == True
+        ).filter(Events.task_id == Tasks.task_id
+        ).filter(Events.user_id == Users.user_id
+        ).filter(extract('month', TaskStreak.timestamp) == datetime.date.today().month
+        ).distinct(TaskStreak.task_id)
+    print(q)
+    return q.all()
+    
 
 @event_wrapper("delete_streak")
 def delete_streak(session, task_id: uuid.UUID, user_id: uuid.UUID):
@@ -161,6 +186,8 @@ def update_task(session, task_id, task_name=None, task_description=None, schedul
 @event_wrapper("delete_task")
 def delete_task(session, task_id):
     """Delete a task, given task id"""
+    session.query(TaskStreak).filter(TaskStreak.task_id == task_id).delete()
+    session.query(Events).filter(Events.task_id == task_id).delete()
     task = session.query(Tasks).filter(Tasks.task_id == task_id).first()
     session.delete(task)
 

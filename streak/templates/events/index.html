@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% include 'navbar.html' %}
+<section class="section">
+  <div class="container">
+    <h1 class="title">
+    Notifications
+    </h1>
+  </div>
+
+
+  <div class="container mt-4">
+    {% if notifications is defined and notifications|length > 0 %}
+
+        {% for notification in notifications %}
+        <div class="notification is-primary is-light">
+            <button class="delete"></button>
+            <b>{{ notification.name }}</b> reached a new streak of {{ notification.streak }} days on {{ notification.task_name }}!
+            <br>
+            <button class="button is-primary mt-4">
+                {% set selected_greeting = greetings|random %}
+                {{ selected_greeting }}
+            </button>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>You are all caught up 💯</p>
+    {% endif %}
+  </div>
+
+</section>
+
+{% endblock %}
