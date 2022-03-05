@@ -34,10 +34,10 @@ function loginHtmlCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const next: string = urlParams.get('next');
         let nextUrl = "/"
-        if (next != null && next != "" && next != "undefined" && next != null) {
+        if (next != null && next != "") {
             nextUrl = decodeURI(next)
         }
-        window.location.replace(next);
+        window.location.replace(nextUrl);
     }, function() {
 
     alert('Login failed')
@@ -89,6 +89,15 @@ function tasksUpdateCompleteStatus() {
         })
         
     })
+
+}
+
+function onUserPageLoadCallback() {
+    let addFriendButton = document.getElementById('streak__button-new_task_create')
+
+    addFriendButton.onclick = function() {
+        addFriendButton.classList.add('is-loading')
+    }
 
 }
 
@@ -188,6 +197,12 @@ export function registerAllCallbacks() {
             onDefaultPageLoadCallback()
             navBarSetup()
             break;
+        case /\/\@.*/.test(window.location.pathname):
+            navBarSetup()
+            onUserPageLoadCallback();
+            
+            break
+
         case /\//.test(window.location.pathname):
             onDefaultPageLoadCallback()
             navBarSetup()
