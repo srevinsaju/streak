@@ -38,7 +38,6 @@ def create_task(session, task_uuid, task_name, task_description, schedule, user_
 
 
 def create_streak(session, task_id, user_id):
-    """Create new accounts with random account IDs and default field values"""
 
     task = (
         session.query(TaskStreak)
@@ -141,6 +140,10 @@ def get_task(session, user_uuid, task_uuid) -> Tasks:
         .filter(Tasks.task_id == task_uuid)
         .first()
     )
+
+
+def get_user(session, user_uuid) -> Users:
+    return session.query(Users).filter(Tasks.user_id == user_uuid).first()
 
 
 def validate_user_login(session, name, password):

@@ -24,7 +24,7 @@ except Exception as e:
     exit()
 
 
-@app.route("/api/v1/tasks/create", methods=["GET", "POST"])
+@app.route("/api/v1/tasks/create", methods=["POST"])
 def create():
     dct = request.get_json().get("task")
     name = dct.get("name")
@@ -50,6 +50,7 @@ def delete(task_id):
         sessionmaker(bind=engine),
         lambda session: utility_funcs.delete_task(uuid.UUID(task_id)),
     )
+    return "OK"
 
 
 @app.route("/api/v1/task/<task_uuid>/update", methods=["POST"])
@@ -76,9 +77,7 @@ def set_completed(task_uuid):
         raise ValueError("Invalid task payload")
     run_transaction(
         sessionmaker(bind=engine),
-        lambda session: utility_funcs.create_streak(
-            session, task_uuid, user_uuid
-        ),
+        lambda session: utility_funcs.create_streak(session, task_uuid, user_uuid),
     )
     return "OK"
 
@@ -90,14 +89,12 @@ def reset_streak(task_uuid):
         raise ValueError("Invalid task payload")
     run_transaction(
         sessionmaker(bind=engine),
-        lambda session: utility_funcs.delete_streak(
-            session, task_uuid, user_uuid
-        ),
+        lambda session: utility_funcs.delete_streak(session, task_uuid, user_uuid),
     )
     return "OK"
 
 
-@app.route("/api/v1/login")
+@app.route("/api/v1/login", methods=["POST"])
 def login():
     dct = request.get_json()
     if not dct.get("name") or not dct.get("password"):
@@ -120,3 +117,19 @@ def login():
             os.getenv("SECRET_KEY"),
             algorithm="HS256",
         )
+    return "OK"
+
+
+@app.route("/api/v1/register", methods=["POST"])
+def register():
+    dct = request.get_json()
+    if not dct.get("name") or not dct.get("password"):
+        raise ValueError("Invalid task payload")
+    user_id = uuid.uuid4()
+    run_transaction(
+        sessionmaker(bind=engine),
+        lambda session: utility_funcs.create_account(
+            session, user_id, dct["name"], dct["password"]
+        ),
+    )
+    return "OK"
