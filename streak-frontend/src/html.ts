@@ -1,7 +1,7 @@
 
 import { login, register, isLoggedIn } from './auth'
 import { parseUserId } from './utils'
-import { CreateNewTask, GetTaskCompletionStatus, GetTasksList, ResetTaskCompletion, SetTaskCompleted, UpdateTask } from "./api"
+import { AddFriend, CreateNewTask, GetFriendStatus, GetSelfInfo, GetTaskCompletionStatus, GetTasksList, ResetTaskCompletion, SetTaskCompleted, Unfriend, UpdateTask } from "./api"
 import { ListenEventChanges } from './ws'
 
 
@@ -92,12 +92,45 @@ function tasksUpdateCompleteStatus() {
 
 }
 
+function refreshFriendStatus (addFriendButton: HTMLElement, friends: boolean) {
+    if (!friends) {
+        addFriendButton.classList.add('is-primary')
+        addFriendButton.classList.remove('is-error')
+    } else {
+        addFriendButton.classList.remove('is-primary')
+        addFriendButton.classList.add('is-error')
+    }
+    addFriendButton.classList.remove('is-loading')
+
+}
+
 function onUserPageLoadCallback() {
     let addFriendButton = document.getElementById('streak__button-new_task_create')
+    GetFriendStatus(addFriendButton.dataset.userId, function(resp: { friends: boolean; }) {
+        refreshFriendStatus(addFriendButton, resp.friends)
+        addFriendButton.onclick = function() {
+            addFriendButton.classList.add('is-loading')
+            if (addFriendButton.classList.contains('is-primary')) {
+                AddFriend(addFriendButton.dataset.userId, function() {
+                    refreshFriendStatus(addFriendButton, true)
+                }, function() {
+                    alert("Couldn't add friend")
+                    addFriendButton.classList.remove('is-loading')
+                })
+            } else {
+                Unfriend(addFriendButton.dataset.userId, function() {
+                    refreshFriendStatus(addFriendButton, false)
+                }, function() {
+                    alert("Couldn't add friend")
+                    addFriendButton.classList.remove('is-loading')
+                })
+            }
+        }
 
-    addFriendButton.onclick = function() {
-        addFriendButton.classList.add('is-loading')
-    }
+    }, function () {
+        alert("Failed fetching friend status")
+    })
+
 
 }
 
@@ -176,6 +209,27 @@ function onDefaultPageLoadCallback() {
 }
 
 
+function onDefaultPageUpdateStatus() {
+    let date = new Date();
+    let hrs =date.getHours();
+    let greet = "Good day!";
+    if (hrs < 12)
+        greet = 'Good Morning';
+    else if (hrs >= 12 && hrs <= 17)
+        greet = 'Good Afternoon';
+    else if (hrs >= 17 && hrs <= 24)
+        greet = 'Good Evening';
+    
+    let status =  document.getElementById('streak__h2-status')
+    GetSelfInfo(function(resp: { name: string; }) {
+        status.innerText = `${greet}, ${resp.name}.`
+    }, function() {
+        status.innerText = `${greet}.`
+    })
+    
+    
+}
+
 function navBarSetup() {
     let navBar =  <HTMLButtonElement>document.getElementsByClassName('navbar-burger').item(0)
     navBar.onclick = function() {
@@ -206,6 +260,7 @@ export function registerAllCallbacks() {
         case /\//.test(window.location.pathname):
             onDefaultPageLoadCallback()
             navBarSetup()
+            onDefaultPageUpdateStatus()
             ListenEventChanges()
 
             break

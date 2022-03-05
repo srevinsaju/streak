@@ -2,7 +2,7 @@ import os
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 
-from .models import Users, Tasks, TaskStreak
+from .models import Friends, Users, Tasks, TaskStreak
 
 
 def create_tables(engine: Engine):
@@ -12,6 +12,7 @@ def create_tables(engine: Engine):
     Users.__table__.create(bind=engine, checkfirst=True)
     Tasks.__table__.create(bind=engine, checkfirst=True)
     TaskStreak.__table__.create(bind=engine, checkfirst=True)
+    Friends.__table__.create(bind=engine, checkfirst=True)
 
 
     if os.getenv("DEBUG"):
