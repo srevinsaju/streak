@@ -11,7 +11,7 @@ from ..exceptions import AuthenticationError
 from .models import Friends, Tasks, TaskStreak, Users
 from . import models
 from sqlalchemy import func
-from events import event_wrapper
+from .events import event_wrapper
 
 
 def check_account_exists(session, username):
