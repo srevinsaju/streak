@@ -9,12 +9,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {
                     i: None
                     for i in [
@@ -41,12 +42,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {
                     i: None
                     for i in [
@@ -70,12 +72,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {i: None for i in ["task_id", "user_id"]}
                 for key, value in zip(dct, iterator):
                     dct[key] = value
@@ -90,12 +93,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {i: None for i in ["task_id", "user_id"]}
                 for key, value in zip(dct, iterator):
                     dct[key] = value
@@ -110,12 +114,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {
                     i: None
                     for i in ["task_id", "task_name", "task_description", "schedule"]
@@ -133,12 +138,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {i: None for i in ["task_id"]}
                 for key, value in zip(dct, iterator):
                     dct[key] = value
@@ -153,12 +159,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {i: None for i in ["user_uuid", "friend_uuid"]}
                 for key, value in zip(dct, iterator):
                     dct[key] = value
@@ -173,12 +180,13 @@ def event_wrapper(event_type):
         def decorator(func):
             @wraps(func)
             def original(*args, **kwargs):
-                # TODO remove this return
-                return func(*args, **kwargs)
                 if "session" in kwargs:
                     del kwargs["session"]
                 iterator = iter(args)
-                next(iterator)
+                try:
+                    next(iterator)
+                except StopIteration:
+                    pass
                 dct = {i: None for i in ["user_uuid", "friend_uuid"]}
                 for key, value in zip(dct, iterator):
                     dct[key] = value
